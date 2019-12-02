@@ -14,13 +14,12 @@ let BoardSizeColumn = 8 //行数、縦に列、0~7
 class Board {
     
     var cells: Array2D<CellState>
+    var characterCells: Array2D<Character>
     
     init() {
         
         self.cells = Array2D<CellState>(rows: BoardSizeRow, columns: BoardSizeColumn, repeatedValue: .Empty)
-        
-        self.cells[0,0] = .Ally
-        self.cells[1,1] = .Enemy
+        self.characterCells = Array2D<Character>(rows: BoardSizeRow, columns: BoardSizeRow, repeatedValue: nil)
         
     }
     

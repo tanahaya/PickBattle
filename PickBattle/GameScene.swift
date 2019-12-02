@@ -14,14 +14,17 @@ class GameScene: SKScene {
     let gameLayer = SKNode()
     let disksLayer = SKNode()
     
-    //画像の管理をdiskNodesで行う
+    //ボード上の画像の管理をdiskNodesで行う
     var diskNodes = Array2D<SKSpriteNode>(rows: BoardSizeRow, columns: BoardSizeColumn)
+    //ボードの情報を管理する。
     var board:Board!
     
     let DiskImageNames = [CellState.Ally: "Ally1",CellState.Enemy: "Ally1"]
+    let DiskCharactersImageNames = [1: "Ally1",2: "Ally1"]
     
-    let SquareSize:CGFloat = 60.0//マス目のサイズを用意
+    let SquareSize:CGFloat = 68.0//マス目のサイズを用意
     
+    var OperatingCharacter:Character? = nil
     
     override func didMove(to view: SKView) {
         
@@ -39,7 +42,7 @@ class GameScene: SKScene {
         self.disksLayer.position = layerPosition
         self.gameLayer.addChild(disksLayer)
         
-        
+        self.initBoard()
         
     }
     
@@ -50,15 +53,46 @@ class GameScene: SKScene {
         
         if let (row,column) = self.convertPointOnBoard(point: location) {
             print("{\(row),\(column)}")
+            
+            if self.board.cells[row,column] == .Ally { //最初に触ったのが.allyの時
+                
+                let character = self.board.characterCells[row,column]
+                character?.Route = []
+                character?.Route.append([row,column])
+                
+                OperatingCharacter = character
+                
+            }
+            
         }
         
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         
+        let touch = touches.first as UITouch?
+        let location = touch!.location(in: self.disksLayer)
+        
+        if let (row,column) = self.convertPointOnBoard(point: location) {
+            
+            if OperatingCharacter?.Route.last == [row,column] {
+                
+            } else {
+                OperatingCharacter?.Route.append([row,column])
+            }
+            
+        }
+        
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        if let route:[[Int]] = OperatingCharacter?.Route {
+            
+            print(route)
+            OperatingCharacter = nil
+            
+        }
         
     }
     
@@ -70,9 +104,39 @@ class GameScene: SKScene {
     func initBoard() {
         
         self.board = Board()
-        self.updateDiskNodes()
+        print(self.board.description)
+        
+        let oneA:Character = Character(Id: 1, Name: "one", Attack: 1, Defence: 1, MaxHp: 50, Move: 4)//とりあえずoneというキャラクターを用意
+        self.addCharacterDiskNodes(character: oneA, row: 1, column: 1)//キャラクターの画像をdiskNodesに追加。
+        
+        //self.updateDiskNodes()
         
     }
+    
+    func addCharacterDiskNodes(character:Character,row:Int,column:Int) {
+        
+        if let state = self.board.cells[row,column] {
+            
+            print(state)
+            
+            if state ==  .Empty {
+                
+                self.board.characterCells[row,column] = character
+                self.board.cells[row,column] = .Ally
+                
+                let newCharacter = SKSpriteNode(imageNamed: DiskCharactersImageNames[character.Id!]! )
+                newCharacter.size = CGSize(width: SquareSize, height: SquareSize)
+                newCharacter.position = self.convertPointOnLayer(row: row, column: column)
+                
+                self.disksLayer.addChild(newCharacter)
+                self.diskNodes[row,column] = newCharacter
+                
+            }
+            
+        }
+        
+    }
+    
     
     func updateDiskNodes(){
         
@@ -97,10 +161,13 @@ class GameScene: SKScene {
                         newNode.position = self.convertPointOnLayer(row: row, column: column)
                         
                         self.disksLayer.addChild(newNode)
-
+                        
                         self.diskNodes[row, column] = newNode
                         
                     }
+                    
+                    
+                    
                 }
             }
         }

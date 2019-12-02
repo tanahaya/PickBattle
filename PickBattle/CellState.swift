@@ -11,7 +11,7 @@ import UIKit
 
 public enum CellState:Int {
     
-    case Empty = 0,Ally,Enemy,Enegy//Emptyが0、allyが1、Enemyが2、Enegyが3
+    case Empty = 0,Route,Ally,Enemy,Enegy//Emptyが0、allyが1、Enemyが2、Enegyが3
     
 }
-    
+

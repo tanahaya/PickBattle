@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1093484A2394D1100020B9A1 /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109348492394D1100020B9A1 /* Character.swift */; };
 		10BD32892393C91E009A2FDD /* CellState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BD32882393C91E009A2FDD /* CellState.swift */; };
 		10BD328D2393CF52009A2FDD /* Array2D.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BD328C2393CF52009A2FDD /* Array2D.swift */; };
 		10BD328F2393DED7009A2FDD /* Broad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10BD328E2393DED7009A2FDD /* Broad.swift */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		109348492394D1100020B9A1 /* Character.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
 		10BD32882393C91E009A2FDD /* CellState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellState.swift; sourceTree = "<group>"; };
 		10BD328C2393CF52009A2FDD /* Array2D.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array2D.swift; sourceTree = "<group>"; };
 		10BD328E2393DED7009A2FDD /* Broad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Broad.swift; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 				10C6064E2393BD4100A3F021 /* GameViewController.swift */,
 				10C6064C2393BD4100A3F021 /* GameScene.swift */,
 				10BD32882393C91E009A2FDD /* CellState.swift */,
+				109348492394D1100020B9A1 /* Character.swift */,
 				10BD328E2393DED7009A2FDD /* Broad.swift */,
 				10BD328C2393CF52009A2FDD /* Array2D.swift */,
 				10C606502393BD4100A3F021 /* Main.storyboard */,
@@ -149,6 +152,7 @@
 			files = (
 				10BD328D2393CF52009A2FDD /* Array2D.swift in Sources */,
 				10C6064D2393BD4100A3F021 /* GameScene.swift in Sources */,
+				1093484A2394D1100020B9A1 /* Character.swift in Sources */,
 				10BD32892393C91E009A2FDD /* CellState.swift in Sources */,
 				10C6064F2393BD4100A3F021 /* GameViewController.swift in Sources */,
 				10BD328F2393DED7009A2FDD /* Broad.swift in Sources */,
