@@ -22,9 +22,13 @@ class GameScene: SKScene {
     let DiskImageNames = [CellState.Ally: "Ally1",CellState.Enemy: "Ally1"]
     let DiskCharactersImageNames = [1: "Ally1",2: "Ally1"]
     
-    let SquareSize:CGFloat = 68.0//マス目のサイズを用意
+    let SquareSize:CGFloat = 68.0 //マス目のサイズを用意
     
     var OperatingCharacter:Character? = nil
+    
+    var AttackButton = SKSpriteNode(imageNamed: "AttackButton")
+    
+    var Allys:[Character] = [] //味方を入れるための配列
     
     override func didMove(to view: SKView) {
         
@@ -44,12 +48,21 @@ class GameScene: SKScene {
         
         self.initBoard()
         
+        //アタックボタン
+        AttackButton.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "AttackButton"), size: AttackButton.size)
+        AttackButton.name = "AttackButton"
+        AttackButton.physicsBody?.isDynamic = false//ぶつかったときに移動するかどうか =>しない
+        AttackButton.position = CGPoint(x: 100,y: 320)//207,が中心に相当近い
+        AttackButton.size = CGSize(width: 100.0, height: 50.0)
+        self.gameLayer.addChild(AttackButton)
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
         let touch = touches.first as UITouch?
         let location = touch!.location(in: self.disksLayer)
+        let gameLocation = touch!.location(in: self.gameLayer)
         
         if let (row,column) = self.convertPointOnBoard(point: location) {
             print("{\(row),\(column)}")
@@ -57,12 +70,23 @@ class GameScene: SKScene {
             if self.board.cells[row,column] == .Ally { //最初に触ったのが.allyの時
                 
                 let character = self.board.characterCells[row,column]
-                character?.Route = []
-                character?.Route.append([row,column])
+                character?.Routes = []
+                character?.Routes.append([row,column])
                 
                 OperatingCharacter = character
                 
             }
+            
+        }
+        
+        if self.gameLayer.atPoint(gameLocation).name == "AttackButton" {
+            
+            self.move()
+            
+            self.AttackButton.alpha = 0.0
+            
+            print("AttackButton")
+            print(self.board.description)
             
         }
         
@@ -75,10 +99,14 @@ class GameScene: SKScene {
         
         if let (row,column) = self.convertPointOnBoard(point: location) {
             
-            if OperatingCharacter?.Route.last == [row,column] {
+            if let LastRoute = OperatingCharacter?.Routes.last {
                 
-            } else {
-                OperatingCharacter?.Route.append([row,column])
+                if LastRoute == [row,column] {
+                    
+                } else {
+                    OperatingCharacter?.Routes.append([row,column])
+                }
+                
             }
             
         }
@@ -87,7 +115,7 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        if let route:[[Int]] = OperatingCharacter?.Route {
+        if let route:[[Int]] = OperatingCharacter?.Routes {
             
             print(route)
             OperatingCharacter = nil
@@ -104,16 +132,16 @@ class GameScene: SKScene {
     func initBoard() {
         
         self.board = Board()
-        print(self.board.description)
         
         let oneA:Character = Character(Id: 1, Name: "one", Attack: 1, Defence: 1, MaxHp: 50, Move: 4)//とりあえずoneというキャラクターを用意
-        self.addCharacterDiskNodes(character: oneA, row: 1, column: 1)//キャラクターの画像をdiskNodesに追加。
+        self.addCharacterBoard(character: oneA, row: 1, column: 1)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.Allys.append(oneA)
         
-        //self.updateDiskNodes()
+        print(self.board.description)
         
     }
     
-    func addCharacterDiskNodes(character:Character,row:Int,column:Int) {
+    func addCharacterBoard(character:Character,row:Int,column:Int) {
         
         if let state = self.board.cells[row,column] {
             
@@ -122,6 +150,7 @@ class GameScene: SKScene {
             if state ==  .Empty {
                 
                 self.board.characterCells[row,column] = character
+                character.Point = [row,column]
                 self.board.cells[row,column] = .Ally
                 
                 let newCharacter = SKSpriteNode(imageNamed: DiskCharactersImageNames[character.Id!]! )
@@ -134,6 +163,144 @@ class GameScene: SKScene {
             }
             
         }
+        
+    }
+    
+    func move() {
+        
+        for ally in Allys {
+            
+            let startRow = ally.Point[0]
+            let startColumn = ally.Point[1]
+            
+            let GoalRow = (ally.Routes.last?[0])!
+            let GoalColumn = (ally.Routes.last?[1])!
+            
+            let routes = ally.Routes
+            print("routes:\(routes)")
+            
+            if routes == [] {
+                
+            } else {
+                
+                let node = diskNodes[startRow,startColumn]
+                
+                self.board.cells[startRow,startColumn] = .Empty
+                self.board.characterCells[startRow,startColumn] = nil
+                self.diskNodes[startRow,startColumn] = nil
+                
+                self.board.cells[GoalRow,GoalColumn] = .Ally
+                self.board.characterCells[GoalRow,GoalColumn] = ally
+                self.diskNodes[GoalRow,GoalColumn] = node
+                 
+                var SKActionArray:[SKAction] = []
+                
+                for routeNum in 0 ..< routes.count {
+                    
+                    if routeNum < routes.count - 1 {
+                        if routes[routeNum][0] == routes[routeNum + 1][0] {
+                            if routes[routeNum][1] < routes[routeNum + 1][1] {
+                                
+                                let action = SKAction.moveBy(x: 68, y: 0, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            } else if routes[routeNum][1] > routes[routeNum + 1][1] {
+                                
+                                let action = SKAction.moveBy(x: -68, y: 0, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            }
+                        } else if routes[routeNum][1] == routes[routeNum + 1][1] {
+                            if routes[routeNum][0] < routes[routeNum + 1][0] {
+                                
+                                let action = SKAction.moveBy(x: 0, y: 68, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            } else if routes[routeNum][0] > routes[routeNum + 1][0] {
+                                
+                                let action = SKAction.moveBy(x: 0, y: -68, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            }
+                        }
+                    }
+                }
+                
+                node?.run(SKAction.sequence(SKActionArray))
+                
+            }
+            
+            ally.Routes = []//ルートの内容を初期化する。
+            
+        }
+        
+    }
+    
+    func moveCharacter(startRow:Int,startColumn:Int,routes:[[Int]]) {
+        
+        let node = diskNodes[startRow,startColumn]
+        
+        let GoalRow:Int = (routes.last?.first)!
+        let GoalColumn:Int = (routes.last?.last)!
+        
+        if self.board.cells[startRow,startColumn] == .Ally {
+            if let character = self.board.characterCells[startRow,startColumn] {
+                
+                print("routes:\(routes)")
+                print("hello")
+                
+                self.board.cells[startRow,startColumn] = .Empty
+                self.board.characterCells[startRow,startColumn] = nil
+                self.diskNodes[startRow,startColumn] = nil
+                
+                self.board.cells[GoalRow,GoalColumn] = .Ally
+                self.board.characterCells[GoalRow,GoalColumn] = character
+                self.diskNodes[GoalRow,GoalColumn] = node
+                
+                
+                var SKActionArray:[SKAction] = []
+                
+                for routeNum in 0 ..< routes.count {
+                    
+                    if routeNum < routes.count - 1 {
+                        if routes[routeNum][0] == routes[routeNum + 1][0] {
+                            if routes[routeNum][1] < routes[routeNum + 1][1] {
+                                
+                                let action = SKAction.moveBy(x: 68, y: 0, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            } else if routes[routeNum][1] > routes[routeNum + 1][1] {
+                                
+                                let action = SKAction.moveBy(x: -68, y: 0, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            }
+                        } else if routes[routeNum][1] == routes[routeNum + 1][1] {
+                            if routes[routeNum][0] < routes[routeNum + 1][0] {
+                                
+                                let action = SKAction.moveBy(x: 0, y: 68, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            } else if routes[routeNum][0] > routes[routeNum + 1][0] {
+                                
+                                let action = SKAction.moveBy(x: 0, y: -68, duration: 1.0)
+                                SKActionArray.append(action)
+                                
+                            }
+                        }
+                    }
+                }
+                
+                if let characterNode = self.diskNodes[startRow,startColumn] {
+                    characterNode.run(SKAction.sequence(SKActionArray))
+                }
+                
+                character.Routes = []//ルートの内容を初期化する。
+                
+            }
+        }
+        
+        
         
     }
     

@@ -26,7 +26,8 @@ class Character {
     var ActiveSkill = ""
     var Attribution:String = ""
     var State:[String] = []
-    var Route:[[Int]] = []
+    var Routes:[[Int]] = []
+    var Point:[Int] = []
     var Side:Int? //0なら味方、1なら敵
     
     init (Id:Int,Name:String,Attack:Int,Defence:Int,MaxHp:Int,Move:Int) {
