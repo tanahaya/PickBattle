@@ -12,15 +12,21 @@ import GameplayKit
 class GameScene: SKScene {
     
     let gameLayer = SKNode()
-    let disksLayer = SKNode()
+    let disksLayer = SKNode()//キャラクターの情報を表示する
+    let routesLayer = SKNode()//ルートの情報を表示する
     
-    //ボード上の画像の管理をdiskNodesで行う
-    var diskNodes = Array2D<SKSpriteNode>(rows: BoardSizeRow, columns: BoardSizeColumn)
-    //ボードの情報を管理する。
+    //ボード上のキャラクター画像の管理をdiskNodesで行う
+    var diskNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
+    //ルートの情報を管理する
+    var routeNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
+    //ボードの情報を管理する。キャラクターとその状態
     var board:Board!
     
     let DiskImageNames = [CellState.Ally: "Ally1",CellState.Enemy: "Ally1"]
     let DiskCharactersImageNames = [1: "Ally1",2: "Ally1"]
+    
+    let routeImageNames = [1: "Route1",2: "Route2",3: "Route3",4: "Route4",5: "Route5",6: "Route6"]
+    let EndPointImageNames = [1: "EndPoint1",2: "EndPoint2",3: "EndPoint3",4: "EndPoint4"]
     
     let SquareSize:CGFloat = 68.0 //マス目のサイズを用意
     
@@ -41,20 +47,19 @@ class GameScene: SKScene {
         //gameLayerを追加
         self.addChild(self.gameLayer)
         
-        //anchorPointからの相対位置、Boardの左下端が(0,0)にするためにdisksLayerを配置
-        let layerPosition = CGPoint(x: -SquareSize * CGFloat(BoardSizeRow) / 2,y: -SquareSize * CGFloat(BoardSizeColumn) / 2)
+        //anchorPointからの相対位置、routesLayerとdisLayerの左下端が(0,0)にするためにdisksLayerを配置
+        let layerPosition = CGPoint(x: -SquareSize * CGFloat(BoardSizeXRow) / 2,y: -SquareSize * CGFloat(BoardSizeYColumn) / 2)
+        
+        self.routesLayer.position = layerPosition
+        self.gameLayer.addChild(routesLayer)
+        
         self.disksLayer.position = layerPosition
         self.gameLayer.addChild(disksLayer)
         
+        
         self.initBoard()
         
-        //アタックボタン
-        AttackButton.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "AttackButton"), size: AttackButton.size)
-        AttackButton.name = "AttackButton"
-        AttackButton.physicsBody?.isDynamic = false//ぶつかったときに移動するかどうか =>しない
-        AttackButton.position = CGPoint(x: 100,y: 320)//207,が中心に相当近い
-        AttackButton.size = CGSize(width: 100.0, height: 50.0)
-        self.gameLayer.addChild(AttackButton)
+        self.setAttackButton()  //アタックボタン
         
     }
     
@@ -70,6 +75,24 @@ class GameScene: SKScene {
             if self.board.cells[row,column] == .Ally { //最初に触ったのが.allyの時
                 
                 let character = self.board.characterCells[row,column]
+                
+                for route in (character?.Routes)! {
+                    
+                    let characterRow = route[0]
+                    let characterColumn = route[1]
+                    
+                    if self.board.cells[characterRow,characterColumn] == .Route {
+                        self.board.cells[characterRow,characterColumn] = .Empty
+                    }
+                    
+                }
+                
+                for route in character!.Routes {
+                    if let prevRoute = self.routeNodes[route[0],route[1]] {
+                        prevRoute.removeFromParent()
+                    }
+                }
+                
                 character?.Routes = []
                 character?.Routes.append([row,column])
                 
@@ -83,9 +106,6 @@ class GameScene: SKScene {
             
             self.move()
             
-            self.AttackButton.alpha = 0.0
-            
-            print("AttackButton")
             print(self.board.description)
             
         }
@@ -99,16 +119,95 @@ class GameScene: SKScene {
         
         if let (row,column) = self.convertPointOnBoard(point: location) {
             
-            if let LastRoute = OperatingCharacter?.Routes.last {
+            if let state = self.board.cells[row,column] {
                 
-                if LastRoute == [row,column] {
+                if state == .Empty {
                     
-                } else {
-                    OperatingCharacter?.Routes.append([row,column])
+                    if let LastRoute = OperatingCharacter?.Routes.last {
+                        
+                        if LastRoute == [row,column] {
+                            
+                        } else if LastRoute[0] - 1 == row || LastRoute[1] - 1 == column || LastRoute[0] + 1 == row || LastRoute[1] + 1 == column {
+                            
+                            OperatingCharacter?.Routes.append([row,column])//ルートを追加済み
+                            self.board.cells[row,column] = .Route
+                            
+                            //以下ルートを表示のためのコード
+                            let routes = OperatingCharacter?.Routes
+                            
+                            if routes?.count  == 2 {
+                                
+                                let lastSquare = routes![1]
+                                let secondlastSquare = routes![0]
+                                
+                                if secondlastSquare[1] + 1 == lastSquare[1] {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 1)
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
+                                }
+                                if secondlastSquare[0] + 1 == lastSquare[0] {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 2)
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
+                                }
+                                if secondlastSquare[1] - 1 == lastSquare[1] {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 3)
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
+                                }
+                                if secondlastSquare[0] - 1 == lastSquare[0] {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 4)
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
+                                }
+                                
+ 
+                            } else if (routes?.count)! >= 3 {
+                                
+                                let lastSquare = routes![routes!.count - 1]
+                                let secondlastSquare = routes![routes!.count - 2]
+                                let thirdlastSquare = routes![routes!.count - 3]
+                                
+                                if secondlastSquare[1] + 1 == lastSquare[1] {
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
+                                }
+                                if secondlastSquare[0] + 1 == lastSquare[0] {
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
+                                }
+                                if secondlastSquare[1] - 1 == lastSquare[1] {
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
+                                }
+                                if secondlastSquare[0] - 1 == lastSquare[0] {
+                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
+                                }
+                                
+                                
+                                if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 1)
+                                }
+                                if (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[1] + 1 == lastSquare[1]) {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 2)
+                                }
+                                if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 3)
+                                }
+                                if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 4)
+                                }
+                                if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[0] - 1 == lastSquare[0]) || (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 5)
+                                }
+                                if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
+                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 6)
+                                }
+                                
+                            }
+                            
+                        }
+                        
+                    }
+                    
                 }
+                //以下Enegyなど処理を書く
+                
                 
             }
-            
         }
         
     }
@@ -168,20 +267,27 @@ class GameScene: SKScene {
     
     func move() {
         
+        var maxMove:Int = 0
+        
         for ally in Allys {
             
-            let startRow = ally.Point[0]
-            let startColumn = ally.Point[1]
-            
-            let GoalRow = (ally.Routes.last?[0])!
-            let GoalColumn = (ally.Routes.last?[1])!
-            
             let routes = ally.Routes
-            print("routes:\(routes)")
+            
+            if maxMove < routes.count {
+                maxMove = routes.count
+            }
             
             if routes == [] {
                 
             } else {
+                
+                let startRow = ally.Point[0]
+                let startColumn = ally.Point[1]
+                
+                let GoalRow = (ally.Routes.last?[0])!
+                let GoalColumn = (ally.Routes.last?[1])!
+                
+                print("routes:\(routes)")
                 
                 let node = diskNodes[startRow,startColumn]
                 
@@ -192,37 +298,36 @@ class GameScene: SKScene {
                 self.board.cells[GoalRow,GoalColumn] = .Ally
                 self.board.characterCells[GoalRow,GoalColumn] = ally
                 self.diskNodes[GoalRow,GoalColumn] = node
+                ally.Point = [GoalRow,GoalColumn]
                  
                 var SKActionArray:[SKAction] = []
                 
                 for routeNum in 0 ..< routes.count {
                     
                     if routeNum < routes.count - 1 {
-                        if routes[routeNum][0] == routes[routeNum + 1][0] {
-                            if routes[routeNum][1] < routes[routeNum + 1][1] {
-                                
-                                let action = SKAction.moveBy(x: 68, y: 0, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            } else if routes[routeNum][1] > routes[routeNum + 1][1] {
-                                
-                                let action = SKAction.moveBy(x: -68, y: 0, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            }
-                        } else if routes[routeNum][1] == routes[routeNum + 1][1] {
-                            if routes[routeNum][0] < routes[routeNum + 1][0] {
-                                
-                                let action = SKAction.moveBy(x: 0, y: 68, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            } else if routes[routeNum][0] > routes[routeNum + 1][0] {
-                                
-                                let action = SKAction.moveBy(x: 0, y: -68, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            }
+                        
+                        if routes[routeNum][0] < routes[routeNum + 1][0] {
+                            
+                            let action = SKAction.moveBy(x: 68, y: 0, duration: 1.0)
+                            SKActionArray.append(action)
+                            
+                        } else if routes[routeNum][0] > routes[routeNum + 1][0] {
+                            
+                            let action = SKAction.moveBy(x: -68, y: 0, duration: 1.0)
+                            SKActionArray.append(action)
+                            
+                        } else if routes[routeNum][1] < routes[routeNum + 1][1] {
+                            
+                            let action = SKAction.moveBy(x: 0, y: 68, duration: 1.0)
+                            SKActionArray.append(action)
+                            
+                        } else if routes[routeNum][1] > routes[routeNum + 1][1] {
+                            
+                            let action = SKAction.moveBy(x: 0, y: -68, duration: 1.0)
+                            SKActionArray.append(action)
+                            
                         }
+                        
                     }
                 }
                 
@@ -234,127 +339,76 @@ class GameScene: SKScene {
             
         }
         
-    }
-    
-    func moveCharacter(startRow:Int,startColumn:Int,routes:[[Int]]) {
-        
-        let node = diskNodes[startRow,startColumn]
-        
-        let GoalRow:Int = (routes.last?.first)!
-        let GoalColumn:Int = (routes.last?.last)!
-        
-        if self.board.cells[startRow,startColumn] == .Ally {
-            if let character = self.board.characterCells[startRow,startColumn] {
-                
-                print("routes:\(routes)")
-                print("hello")
-                
-                self.board.cells[startRow,startColumn] = .Empty
-                self.board.characterCells[startRow,startColumn] = nil
-                self.diskNodes[startRow,startColumn] = nil
-                
-                self.board.cells[GoalRow,GoalColumn] = .Ally
-                self.board.characterCells[GoalRow,GoalColumn] = character
-                self.diskNodes[GoalRow,GoalColumn] = node
-                
-                
-                var SKActionArray:[SKAction] = []
-                
-                for routeNum in 0 ..< routes.count {
-                    
-                    if routeNum < routes.count - 1 {
-                        if routes[routeNum][0] == routes[routeNum + 1][0] {
-                            if routes[routeNum][1] < routes[routeNum + 1][1] {
-                                
-                                let action = SKAction.moveBy(x: 68, y: 0, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            } else if routes[routeNum][1] > routes[routeNum + 1][1] {
-                                
-                                let action = SKAction.moveBy(x: -68, y: 0, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            }
-                        } else if routes[routeNum][1] == routes[routeNum + 1][1] {
-                            if routes[routeNum][0] < routes[routeNum + 1][0] {
-                                
-                                let action = SKAction.moveBy(x: 0, y: 68, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            } else if routes[routeNum][0] > routes[routeNum + 1][0] {
-                                
-                                let action = SKAction.moveBy(x: 0, y: -68, duration: 1.0)
-                                SKActionArray.append(action)
-                                
-                            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 * Double(maxMove - 1)) {
+            
+            for row in 0 ..< BoardSizeXRow { //.routeを.emptyに直す
+                for column in 0 ..< BoardSizeYColumn {
+                    if let state = self.board.cells[row,column] {
+                        if state == .Route {
+                            self.board.cells[row,column] = .Empty
                         }
+                        
+                        if let prevRoute = self.routeNodes[row,column] {
+                            prevRoute.removeFromParent()
+                        }
+                        
                     }
                 }
-                
-                if let characterNode = self.diskNodes[startRow,startColumn] {
-                    characterNode.run(SKAction.sequence(SKActionArray))
-                }
-                
-                character.Routes = []//ルートの内容を初期化する。
-                
             }
+            
         }
-        
         
         
     }
     
-    
-    func updateDiskNodes(){
+    func setRouteImage(row:Int,column:Int,PointFlag:Bool,number:Int) {
         
-        for row in 0 ..< BoardSizeRow {
-            for column in 0 ..< BoardSizeColumn {
-                if let state = self.board.cells[row,column] {
-                    
-                    if let imageName = DiskImageNames[state] {
-                        if let prevNode = self.diskNodes[row, column] {
-                            if prevNode.userData?["state"] as! Int == state.rawValue {
-                                // 変化が無いセルはスキップする
-                                continue
-                            }
-                            // 古いノードを削除
-                            prevNode.removeFromParent()
-                        }
-                        // 新しいノードをレイヤーに追加
-                        let newNode = SKSpriteNode(imageNamed: imageName)
-                        newNode.userData = ["state" : state.rawValue] as NSMutableDictionary
-                        
-                        newNode.size = CGSize(width: SquareSize, height: SquareSize)
-                        newNode.position = self.convertPointOnLayer(row: row, column: column)
-                        
-                        self.disksLayer.addChild(newNode)
-                        
-                        self.diskNodes[row, column] = newNode
-                        
-                    }
-                    
-                    
-                    
-                }
-            }
+        var ImageName:String = ""
+        
+        if PointFlag {
+            ImageName = (EndPointImageNames[number])!
+        } else {
+            ImageName = (routeImageNames[number])!
         }
+        
+        if let prevNode = self.routeNodes[row,column] {
+            prevNode.removeFromParent()
+        }
+                   
+        let newNode = SKSpriteNode(imageNamed: ImageName)
+        newNode.size = CGSize(width: SquareSize, height: SquareSize)
+        newNode.position = self.convertPointOnLayer(row: row, column: column)
+        
+        self.routesLayer.addChild(newNode)
+        self.routeNodes[row,column] = newNode
+        
+    }
+    
+    func setAttackButton() {
+        
+        AttackButton.physicsBody = SKPhysicsBody(texture: SKTexture(imageNamed: "AttackButton"), size: AttackButton.size)
+        AttackButton.name = "AttackButton"
+        AttackButton.physicsBody?.isDynamic = false//ぶつかったときに移動するかどうか =>しない
+        AttackButton.position = CGPoint(x: 100,y: 320)//207,が中心に相当近い
+        AttackButton.size = CGSize(width: 100.0, height: 50.0)
+        self.gameLayer.addChild(AttackButton)
         
     }
     
     /// 盤上での座標をレイヤー上での座標に変換する
     func convertPointOnLayer(row: Int, column: Int) -> CGPoint {
         return CGPoint(
-            x: CGFloat(column) * SquareSize + SquareSize / 2,
-            y: CGFloat(row) * SquareSize + SquareSize / 2
+            x: CGFloat(row) * SquareSize + SquareSize / 2,
+            y: CGFloat(column) * SquareSize + SquareSize / 2
         )
     }
     
     /// レイヤー上での座標を盤上での座標に変換する
     func convertPointOnBoard(point: CGPoint) -> (row: Int, column: Int)? {
         
-        if 0 <= point.x && point.x < SquareSize * CGFloat(BoardSizeRow) &&
-            0 <= point.y && point.y < SquareSize * CGFloat(BoardSizeColumn) {
-            return (Int(point.y / SquareSize), Int(point.x / SquareSize))
+        if 0 <= point.x && point.x < SquareSize * CGFloat(BoardSizeXRow) &&
+            0 <= point.y && point.y < SquareSize * CGFloat(BoardSizeYColumn) {
+            return (Int(point.x / SquareSize), Int(point.y / SquareSize))
         } else {
             return nil
         }

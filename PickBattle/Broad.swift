@@ -8,8 +8,8 @@
 
 import Foundation
 
-let BoardSizeRow = 6 //行数、横列、0~5
-let BoardSizeColumn = 8 //行数、縦に列、0~7
+let BoardSizeXRow = 6
+let BoardSizeYColumn = 8
 
 class Board {
     
@@ -18,31 +18,29 @@ class Board {
     
     init() {
         
-        self.cells = Array2D<CellState>(rows: BoardSizeRow, columns: BoardSizeColumn, repeatedValue: .Empty)
-        self.characterCells = Array2D<Character>(rows: BoardSizeRow, columns: BoardSizeRow, repeatedValue: nil)
+        self.cells = Array2D<CellState>(rows: BoardSizeXRow, columns: BoardSizeYColumn, repeatedValue: .Empty)
+        self.characterCells = Array2D<Character>(rows: BoardSizeXRow, columns: BoardSizeYColumn, repeatedValue: nil)
         
     }
     
     var description: String {
         
-        var rows = Array<String>()
+        var columns = Array<String>()
         
-        for row in 0 ..< BoardSizeRow {
-            
+        for column in 0..<BoardSizeYColumn {
             var cells = Array<String>()
             
-            for column in 0 ..< BoardSizeColumn {
+            for row in 0 ..< BoardSizeXRow {
                 if let state = self.cells[row,column] {
                     cells.append(String(state.rawValue))
                 }
             }
             
             let line:String = cells.joined(separator: "")
-            rows.append(line)
-            
+            columns.append(line)
         }
         
-        return rows.reversed().joined(separator: "\n") //join("\n", rows.reverse())
+        return columns.reversed().joined(separator: "\n")
         
     }
     
