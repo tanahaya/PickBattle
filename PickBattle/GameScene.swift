@@ -22,19 +22,23 @@ class GameScene: SKScene {
     //ボードの情報を管理する。キャラクターとその状態
     var board:Board!
     
-    let DiskImageNames = [CellState.Ally: "Ally1",CellState.Enemy: "Ally1"]
-    let DiskCharactersImageNames = [1: "Ally1",2: "Ally1"]
+    let DiskAllysImageNames = [1: "ally1",2: "ally2",3: "ally3"]
+    let DiskEnemiesImage = [1: "enemy1",2: "enemy2",3: "enemy3"]
     
     let routeImageNames = [1: "Route1",2: "Route2",3: "Route3",4: "Route4",5: "Route5",6: "Route6"]
     let EndPointImageNames = [1: "EndPoint1",2: "EndPoint2",3: "EndPoint3",4: "EndPoint4"]
     
-    let SquareSize:CGFloat = 68.0 //マス目のサイズを用意
+    //マス目のサイズを用意
+    let SquareSize:CGFloat = 68.0
     
     var OperatingCharacter:Character? = nil
     
     var AttackButton = SKSpriteNode(imageNamed: "AttackButton")
     
-    var Allys:[Character] = [] //味方を入れるための配列
+    //味方を入れるための配列
+    var Allys:[Character] = []
+    //敵を入れるための配列
+    var Enemies:[Character] = []
     
     override func didMove(to view: SKView) {
         
@@ -56,10 +60,11 @@ class GameScene: SKScene {
         self.disksLayer.position = layerPosition
         self.gameLayer.addChild(disksLayer)
         
-        
+        //ボードの初期化
         self.initBoard()
         
-        self.setAttackButton()  //アタックボタン
+        //アタックボタン
+        self.setAttackButton()
         
     }
     
@@ -154,6 +159,7 @@ class GameScene: SKScene {
                                             self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 4)
                                             self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
                                         }
+                                        
                                     } else if (routes?.count)! >= 3 {
                                                                    
                                         let lastSquare = routes![routes!.count - 1]
@@ -205,7 +211,9 @@ class GameScene: SKScene {
                     
                 }
                 //以下Enegyなど処理を書く
-                
+                if state == .Enegy {
+                    
+                }
                 
             }
         }
@@ -230,11 +238,20 @@ class GameScene: SKScene {
     //盤面の初期化
     func initBoard() {
         
+        //ボードのインスタンスを生成
         self.board = Board()
         
-        let oneA:Character = Character(Id: 1, Name: "one", Attack: 1, Defence: 1, MaxHp: 50, Move: 4)//とりあえずoneというキャラクターを用意
-        self.addCharacterBoard(character: oneA, row: 1, column: 1)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        let oneA:Character = Character(Id: 1, Name: "one", Attack: 1, Defence: 1, MaxHp: 50, Move: 4)//oneeというキャラクターを用意
+        self.addCharacterBoard(character: oneA, row: 0, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(oneA)
+        
+        let twoB:Character = Character(Id: 2, Name: "two", Attack: 1, Defence: 1, MaxHp: 50, Move: 5)//twoというキャラクターを用意
+        self.addCharacterBoard(character: twoB, row: 2, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.Allys.append(twoB)
+
+        let threeC:Character = Character(Id: 3, Name: "three", Attack: 1, Defence: 1, MaxHp: 50, Move: 6)//threeというキャラクターを用意
+        self.addCharacterBoard(character: threeC, row: 4, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.Allys.append(threeC)
         
         print(self.board.description)
         
@@ -252,7 +269,7 @@ class GameScene: SKScene {
                 character.Point = [row,column]
                 self.board.cells[row,column] = .Ally
                 
-                let newCharacter = SKSpriteNode(imageNamed: DiskCharactersImageNames[character.Id!]! )
+                let newCharacter = SKSpriteNode(imageNamed: DiskAllysImageNames[character.Id!]!)
                 newCharacter.size = CGSize(width: SquareSize, height: SquareSize)
                 newCharacter.position = self.convertPointOnLayer(row: row, column: column)
                 
@@ -421,4 +438,5 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
     }
+    
 }
