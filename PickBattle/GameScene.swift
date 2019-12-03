@@ -76,7 +76,7 @@ class GameScene: SKScene {
                 
                 let character = self.board.characterCells[row,column]
                 
-                for route in (character?.Routes)! {
+                for route in character!.Routes {
                     
                     let characterRow = route[0]
                     let characterColumn = route[1]
@@ -85,12 +85,10 @@ class GameScene: SKScene {
                         self.board.cells[characterRow,characterColumn] = .Empty
                     }
                     
-                }
-                
-                for route in character!.Routes {
-                    if let prevRoute = self.routeNodes[route[0],route[1]] {
+                    if let prevRoute = self.routeNodes[characterRow,characterColumn] {
                         prevRoute.removeFromParent()
                     }
+                    
                 }
                 
                 character?.Routes = []
@@ -105,8 +103,6 @@ class GameScene: SKScene {
         if self.gameLayer.atPoint(gameLocation).name == "AttackButton" {
             
             self.move()
-            
-            print(self.board.description)
             
         }
         
@@ -125,76 +121,80 @@ class GameScene: SKScene {
                     
                     if let LastRoute = OperatingCharacter?.Routes.last {
                         
-                        if LastRoute == [row,column] {
+                        if LastRoute != [row,column] {
                             
-                        } else if LastRoute[0] - 1 == row || LastRoute[1] - 1 == column || LastRoute[0] + 1 == row || LastRoute[1] + 1 == column {
-                            
-                            OperatingCharacter?.Routes.append([row,column])//ルートを追加済み
-                            self.board.cells[row,column] = .Route
-                            
-                            //以下ルートを表示のためのコード
-                            let routes = OperatingCharacter?.Routes
-                            
-                            if routes?.count  == 2 {
+                            if LastRoute[0] - 1 == row || LastRoute[1] - 1 == column || LastRoute[0] + 1 == row || LastRoute[1] + 1 == column {
                                 
-                                let lastSquare = routes![1]
-                                let secondlastSquare = routes![0]
-                                
-                                if secondlastSquare[1] + 1 == lastSquare[1] {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 1)
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
-                                }
-                                if secondlastSquare[0] + 1 == lastSquare[0] {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 2)
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
-                                }
-                                if secondlastSquare[1] - 1 == lastSquare[1] {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 3)
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
-                                }
-                                if secondlastSquare[0] - 1 == lastSquare[0] {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 4)
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
-                                }
-                                
- 
-                            } else if (routes?.count)! >= 3 {
-                                
-                                let lastSquare = routes![routes!.count - 1]
-                                let secondlastSquare = routes![routes!.count - 2]
-                                let thirdlastSquare = routes![routes!.count - 3]
-                                
-                                if secondlastSquare[1] + 1 == lastSquare[1] {
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
-                                }
-                                if secondlastSquare[0] + 1 == lastSquare[0] {
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
-                                }
-                                if secondlastSquare[1] - 1 == lastSquare[1] {
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
-                                }
-                                if secondlastSquare[0] - 1 == lastSquare[0] {
-                                    self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
-                                }
-                                
-                                
-                                if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 1)
-                                }
-                                if (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[1] + 1 == lastSquare[1]) {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 2)
-                                }
-                                if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 3)
-                                }
-                                if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 4)
-                                }
-                                if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[0] - 1 == lastSquare[0]) || (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[0] + 1 == lastSquare[0]) {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 5)
-                                }
-                                if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
-                                    self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 6)
+                                if (OperatingCharacter?.Move)! >= (OperatingCharacter?.Routes.count)! {
+                                    
+                                    OperatingCharacter?.Routes.append([row,column])//ルートを追加します
+                                    self.board.cells[row,column] = .Route
+                                    
+                                    //以下ルートを表示のためのコード
+                                    let routes = OperatingCharacter?.Routes
+                                                               
+                                    if routes?.count  == 2 {
+                                                                   
+                                        let lastSquare = routes![1]
+                                        let secondlastSquare = routes![0]
+                                                                   
+                                        if secondlastSquare[1] + 1 == lastSquare[1] {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 1)
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
+                                        }
+                                        if secondlastSquare[0] + 1 == lastSquare[0] {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 2)
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
+                                        }
+                                        if secondlastSquare[1] - 1 == lastSquare[1] {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 3)
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
+                                        }
+                                        if secondlastSquare[0] - 1 == lastSquare[0] {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 4)
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
+                                        }
+                                    } else if (routes?.count)! >= 3 {
+                                                                   
+                                        let lastSquare = routes![routes!.count - 1]
+                                        let secondlastSquare = routes![routes!.count - 2]
+                                        let thirdlastSquare = routes![routes!.count - 3]
+                                        
+                                        if secondlastSquare[1] + 1 == lastSquare[1] {
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
+                                        }
+                                        if secondlastSquare[0] + 1 == lastSquare[0] {
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
+                                        }
+                                        if secondlastSquare[1] - 1 == lastSquare[1] {
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
+                                        }
+                                        if secondlastSquare[0] - 1 == lastSquare[0] {
+                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
+                                        }
+                                                                   
+                                                                   
+                                        if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 1)
+                                        }
+                                        if (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[1] + 1 == lastSquare[1]) {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 2)
+                                        }
+                                        if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 3)
+                                        }
+                                        if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 4)
+                                        }
+                                        if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[0] - 1 == lastSquare[0]) || (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 5)
+                                        }
+                                        if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
+                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 6)
+                                        }
+                                                                   
+                                    }
+                                    
                                 }
                                 
                             }
@@ -308,22 +308,22 @@ class GameScene: SKScene {
                         
                         if routes[routeNum][0] < routes[routeNum + 1][0] {
                             
-                            let action = SKAction.moveBy(x: 68, y: 0, duration: 1.0)
+                            let action = SKAction.moveBy(x: 68, y: 0, duration: 0.5)
                             SKActionArray.append(action)
                             
                         } else if routes[routeNum][0] > routes[routeNum + 1][0] {
                             
-                            let action = SKAction.moveBy(x: -68, y: 0, duration: 1.0)
+                            let action = SKAction.moveBy(x: -68, y: 0, duration: 0.5)
                             SKActionArray.append(action)
                             
                         } else if routes[routeNum][1] < routes[routeNum + 1][1] {
                             
-                            let action = SKAction.moveBy(x: 0, y: 68, duration: 1.0)
+                            let action = SKAction.moveBy(x: 0, y: 68, duration: 0.5)
                             SKActionArray.append(action)
                             
                         } else if routes[routeNum][1] > routes[routeNum + 1][1] {
                             
-                            let action = SKAction.moveBy(x: 0, y: -68, duration: 1.0)
+                            let action = SKAction.moveBy(x: 0, y: -68, duration: 0.5)
                             SKActionArray.append(action)
                             
                         }
@@ -339,7 +339,7 @@ class GameScene: SKScene {
             
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 * Double(maxMove - 1)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5 * Double(maxMove - 1)) {
             
             for row in 0 ..< BoardSizeXRow { //.routeを.emptyに直す
                 for column in 0 ..< BoardSizeYColumn {
@@ -355,6 +355,8 @@ class GameScene: SKScene {
                     }
                 }
             }
+            
+            print(self.board.description)
             
         }
         
