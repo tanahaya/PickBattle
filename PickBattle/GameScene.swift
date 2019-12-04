@@ -15,6 +15,7 @@ class GameScene: SKScene {
     let disksLayer = SKNode()//キャラクターの情報を表示する
     let itemLayer = SKNode()//アイテムの情報を表示する
     let routesLayer = SKNode()//ルートの情報を表示する
+    let effectLayer = SKNode()//エフェクトの情報を表示する
     
     //ボード上のキャラクター画像の管理をdiskNodesで行う
     var diskNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
@@ -22,14 +23,18 @@ class GameScene: SKScene {
     var itemNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
     //ルートの情報を管理する
     var routeNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
+    //エフェクトの情報を管理する
+    var effectNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
     //ボードの情報を管理する。キャラクターとその状態
     var board:Board!
     
     let DiskAllysImageNames = [1: "ally1",2: "ally2",3: "ally3"]
-    let DiskEnemiesImage = [1: "enemy1",2: "enemy2",3: "enemy3"]
+    let DiskEnemiesImageNames = [1: "enemy1",2: "enemy2",3: "enemy3"]
     
     let routeImageNames = [1: "Route1",2: "Route2",3: "Route3",4: "Route4",5: "Route5",6: "Route6"]
     let EndPointImageNames = [1: "EndPoint1",2: "EndPoint2",3: "EndPoint3",4: "EndPoint4"]
+    
+    let AttackEffectImageNames = [1:"AttackEffect1"]
     
     //マス目のサイズを用意
     let SquareSize:CGFloat = 68.0
@@ -65,6 +70,9 @@ class GameScene: SKScene {
         
         self.disksLayer.position = layerPosition
         self.gameLayer.addChild(disksLayer)
+        
+        self.effectLayer.position = layerPosition
+        self.gameLayer.addChild(effectLayer)
         
         //ボードの初期化
         self.initBoard()
@@ -224,12 +232,7 @@ class GameScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        if let route:[[Int]] = OperatingCharacter?.Routes {
-            
-            print(route)
-            OperatingCharacter = nil
-            
-        }
+        OperatingCharacter = nil
         
     }
     
@@ -243,17 +246,43 @@ class GameScene: SKScene {
         //ボードのインスタンスを生成
         self.board = Board()
         
-        let oneA:Character = Character(Id: 1, Name: "one", Attack: 1, Defence: 1, MaxHp: 50, Move: 4)//oneeというキャラクターを用意
+        //味方の生成
+        let oneA:Character = Character(Id: 1, Name: "one", Attack: 10, Defence: 1, MaxHp: 50, Move: 4,Side: .ally)//oneeというキャラクターを用意
+        oneA.ActiveSkill0 = Skill(id: 2, name: "", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
+        oneA.ActiveSkill1 = Skill(id: 2, name: "", magnification: 1.0, range: [[-1,1],[-1,0],[-1,0]], skillType: .attack)
+        oneA.ActiveSkill2 = Skill(id: 2, name: "", magnification: 2.0, range: [[0,1],[0,-1]], skillType: .attack)
+        oneA.ActiveSkill3 = Skill(id: 1, name: "tate", magnification: 3.0, range: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],[0,-3],[0,-4],[0,-5],[0,-6],[0,-7]], skillType: .attack)
         self.addCharacterBoard(character: oneA, row: 0, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(oneA)
         
-        let twoB:Character = Character(Id: 2, Name: "two", Attack: 1, Defence: 1, MaxHp: 50, Move: 5)//twoというキャラクターを用意
+        let twoB:Character = Character(Id: 2, Name: "two", Attack: 10, Defence: 1, MaxHp: 50, Move: 5,Side: .ally)//twoというキャラクターを用意
+        twoB.ActiveSkill0 = Skill(id: 1, name: "yoko", magnification: 1.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .attack)
+        twoB.ActiveSkill1 = Skill(id: 1, name: "yoko", magnification: 1.0, range: [[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
+        twoB.ActiveSkill2 = Skill(id: 1, name: "yoko", magnification: 1.0, range: [[1,1],[0,1],[-1,1],[1,-1],[0,-1],[-1,-1]], skillType: .attack)
+        twoB.ActiveSkill3 = Skill(id: 1, name: "yoko", magnification: 2.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
         self.addCharacterBoard(character: twoB, row: 2, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(twoB)
         
-        let threeC:Character = Character(Id: 3, Name: "three", Attack: 1, Defence: 1, MaxHp: 50, Move: 6)//threeというキャラクターを用意
+        let threeC:Character = Character(Id: 3, Name: "three", Attack: 10, Defence: 1, MaxHp: 50, Move: 6,Side: .ally)//threeというキャラクターを用意
+        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
+        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 1.0, range: [[0,1],[0,-1]], skillType: .attack)
+        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 1.0, range: [[-1,-1],[-1,0],[-1,1]], skillType: .attack)
+        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 2.0, range: [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]], skillType: .attack)
         self.addCharacterBoard(character: threeC, row: 4, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(threeC)
+        
+        //敵の生成
+        let firstA:Character = Character(Id: 1, Name: "first", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        self.addCharacterBoard(character: firstA, row: 0, column: 6)
+        self.Enemies.append(firstA)
+        
+        let secondB:Character = Character(Id: 2, Name: "second", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        self.addCharacterBoard(character: secondB, row: 2, column: 6)
+        self.Enemies.append(secondB)
+        
+        let thirdC:Character = Character(Id: 3, Name: "third", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        self.addCharacterBoard(character: thirdC, row: 4, column: 6)
+        self.Enemies.append(thirdC)
         
         //エネルギーを配置する
         self.setEnegy()
@@ -270,16 +299,33 @@ class GameScene: SKScene {
             
             if state ==  .Empty {
                 
-                self.board.characterCells[row,column] = character
-                character.Point = [row,column]
-                self.board.cells[row,column] = .Ally
-                
-                let newCharacter = SKSpriteNode(imageNamed: DiskAllysImageNames[character.Id!]!)
-                newCharacter.size = CGSize(width: SquareSize, height: SquareSize)
-                newCharacter.position = self.convertPointOnLayer(row: row, column: column)
-                
-                self.disksLayer.addChild(newCharacter)
-                self.diskNodes[row,column] = newCharacter
+                if character.Side == .ally { //追加するキャラクターが味方の時の処理
+                    
+                    self.board.characterCells[row,column] = character
+                    character.Point = [row,column]
+                    self.board.cells[row,column] = .Ally
+                    
+                    let newCharacter = SKSpriteNode(imageNamed: DiskAllysImageNames[character.Id!]!)
+                    newCharacter.size = CGSize(width: SquareSize, height: SquareSize)
+                    newCharacter.position = self.convertPointOnLayer(row: row, column: column)
+                    
+                    self.disksLayer.addChild(newCharacter)
+                    self.diskNodes[row,column] = newCharacter
+                    
+                } else if character.Side == .enemy { //追加するキャラクターが敵の時の処理
+                    
+                    self.board.characterCells[row,column] = character
+                    character.Point = [row,column]
+                    self.board.cells[row,column] = .Enemy
+                    
+                    let newCharacter = SKSpriteNode(imageNamed: DiskEnemiesImageNames[character.Id!]!)
+                    newCharacter.size = CGSize(width: SquareSize, height: SquareSize)
+                    newCharacter.position = self.convertPointOnLayer(row: row, column: column)
+                    
+                    self.disksLayer.addChild(newCharacter)
+                    self.diskNodes[row,column] = newCharacter
+                    
+                }
                 
             }
             
@@ -394,10 +440,146 @@ class GameScene: SKScene {
             
             print(self.board.description)
             
-            self.setEnegy()
+            let waitTime = self.allysAttack()
             
+            DispatchQueue.main.asyncAfter(deadline: .now() + waitTime ) {
+                
+                self.judgeAlive()
+                self.setEnegy()
+                self.resetAllysEnegyLevel()
+                
+            }
         }
         
+        
+    }
+    
+    func allysAttack() -> (Double) {
+        
+        var waitTime = 0.0
+        
+        for ally in Allys {
+            
+            for i in 0 ..< ally.EnegyLevel {
+                
+                var attackSkill:Skill?
+                
+                switch i {
+                    
+                    case 0:
+                        attackSkill = ally.ActiveSkill0
+                    case 1:
+                        attackSkill = ally.ActiveSkill1
+                    case 2:
+                        attackSkill = ally.ActiveSkill2
+                    case 3:
+                        attackSkill = ally.ActiveSkill3
+                    default:
+                        attackSkill = ally.ActiveSkill0
+                    
+                }
+                
+                let attackRanges = attackSkill?.range
+                
+                if attackSkill?.skillType == .attack {
+                    
+                    for range in attackRanges! {
+                        
+                        let activeRange = [ally.Point[0] + range[0],ally.Point[1] + range[1]]
+                        
+                        if activeRange[0] >= 0 && activeRange[0] < 6 && activeRange[1] >= 0 && activeRange[1] < 8 {
+                            self.AttackEffect(row: activeRange[0], column: activeRange[1],wait: waitTime)
+                        }
+                        
+                        if self.board.cells[activeRange[0],activeRange[1]] == .Enemy {
+                            
+                            print("Attack")
+                            let enemy = self.board.characterCells[activeRange[0],activeRange[1]]
+                            self.damageEnemyHp(damage: Int(Double(ally.Attack!) * attackSkill!.magnification), enemy: enemy!)
+                            
+                        }
+                    }
+                    
+                } else if attackSkill?.skillType == .heal {
+                    
+                }
+                
+                waitTime = waitTime + 0.5
+                
+            }
+        }
+        
+        return waitTime
+        
+    }
+    
+    //攻撃のエフェクトを追加する。
+    func AttackEffect(row:Int,column:Int,wait:Double) {
+        
+        let newEffect = SKSpriteNode(imageNamed:  AttackEffectImageNames[1]!)
+        newEffect.size = CGSize(width: SquareSize, height: SquareSize)
+        newEffect.position = self.convertPointOnLayer(row: row, column: column)
+        newEffect.alpha = 0.0
+        
+        self.effectLayer.addChild(newEffect)
+        self.effectNodes[row,column] = newEffect
+        
+        let firstWait = SKAction.wait(forDuration: wait)
+        let fadeIn = SKAction.fadeIn(withDuration: 0.2)
+        let wait = SKAction.wait(forDuration: 0.2)
+        let fadeOut = SKAction.fadeOut(withDuration: 0.1)
+        let remove = SKAction.removeFromParent()
+        
+        newEffect.run(SKAction.sequence([firstWait,fadeIn,wait,fadeOut,remove]))
+        
+    }
+    
+    //敵のhpを減らすメソッド
+    func damageEnemyHp(damage:Int,enemy:Character) {
+        
+        print("beforeHp:\(enemy.Hp!)")
+        enemy.Hp! = enemy.Hp! - damage
+        print("afterHp:\(enemy.Hp!)")
+        
+    }
+    
+    //生死を判定する。
+    func judgeAlive() {
+        
+        for enemy in Enemies {
+            
+            if enemy.Hp! <= 0 {
+                
+                //敵の死亡処理
+                let point = [enemy.Point[0],enemy.Point[1]]
+                
+                //画像の削除
+                let fadeOut = SKAction.fadeOut(withDuration: 0.5)
+                fadeOut.timingMode = .easeIn
+                let remove = SKAction.removeFromParent()
+                
+                let enemyImage = self.diskNodes[point[0],point[1]]
+                enemyImage?.run(SKAction.sequence([fadeOut,remove]))
+                
+                //情報の削除
+                self.board.cells[point[0],point[1]] = .Empty
+                self.board.characterCells[point[0],point[1]] = nil
+                
+                //敵の配列から排除する
+                if let i = Enemies.firstIndex(of: enemy) {
+                    Enemies.remove(at: i)
+                }
+                
+            }
+            
+        }
+    }
+    
+    func resetAllysEnegyLevel() {
+        
+        for ally in Allys {
+            ally.EnegyLevel = 1
+        }
         
     }
     
@@ -494,7 +676,6 @@ class GameScene: SKScene {
         }
         
     }
-    
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
