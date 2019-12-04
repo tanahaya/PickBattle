@@ -20,7 +20,9 @@ class Character {
     var MaxHp:Int?
     var Hp:Int?
     var Move:Int?
-    var Level:Int?
+    var EnegyLevel:Int = 0
+    var ExperienceLevel:Int = 1
+    var DevelopLevel:Int = 1
     var Race:String = ""
     var PassiveSkill = ""
     var ActiveSkill = ""

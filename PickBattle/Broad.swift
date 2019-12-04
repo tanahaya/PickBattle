@@ -15,11 +15,13 @@ class Board {
     
     var cells: Array2D<CellState>
     var characterCells: Array2D<Character>
+    var itemCells: Array2D<CellItem>
     
     init() {
         
         self.cells = Array2D<CellState>(rows: BoardSizeXRow, columns: BoardSizeYColumn, repeatedValue: .Empty)
         self.characterCells = Array2D<Character>(rows: BoardSizeXRow, columns: BoardSizeYColumn, repeatedValue: nil)
+        self.itemCells = Array2D<CellItem>(rows: BoardSizeXRow, columns: BoardSizeYColumn, repeatedValue: .Empty)
         
     }
     

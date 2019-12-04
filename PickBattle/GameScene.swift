@@ -13,10 +13,13 @@ class GameScene: SKScene {
     
     let gameLayer = SKNode()
     let disksLayer = SKNode()//キャラクターの情報を表示する
+    let itemLayer = SKNode()//アイテムの情報を表示する
     let routesLayer = SKNode()//ルートの情報を表示する
     
     //ボード上のキャラクター画像の管理をdiskNodesで行う
     var diskNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
+    //ボード上のアイテム画像の管理をitemNodesで行う
+    var itemNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
     //ルートの情報を管理する
     var routeNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
     //ボードの情報を管理する。キャラクターとその状態
@@ -56,6 +59,9 @@ class GameScene: SKScene {
         
         self.routesLayer.position = layerPosition
         self.gameLayer.addChild(routesLayer)
+        
+        self.itemLayer.position = layerPosition
+        self.gameLayer.addChild(itemLayer)
         
         self.disksLayer.position = layerPosition
         self.gameLayer.addChild(disksLayer)
@@ -128,7 +134,7 @@ class GameScene: SKScene {
                         
                         if LastRoute != [row,column] {
                             
-                            if LastRoute[0] - 1 == row || LastRoute[1] - 1 == column || LastRoute[0] + 1 == row || LastRoute[1] + 1 == column {
+                            if (LastRoute[0] - 1 == row && LastRoute[1] == column) || (LastRoute[1] - 1 == column && LastRoute[0] == row) || (LastRoute[0] + 1 == row && LastRoute[1] == column) || (LastRoute[1] + 1 == column && LastRoute[0] == row) {
                                 
                                 if (OperatingCharacter?.Move)! >= (OperatingCharacter?.Routes.count)! {
                                     
@@ -210,10 +216,6 @@ class GameScene: SKScene {
                     }
                     
                 }
-                //以下Enegyなど処理を書く
-                if state == .Enegy {
-                    
-                }
                 
             }
         }
@@ -252,6 +254,9 @@ class GameScene: SKScene {
         let threeC:Character = Character(Id: 3, Name: "three", Attack: 1, Defence: 1, MaxHp: 50, Move: 6)//threeというキャラクターを用意
         self.addCharacterBoard(character: threeC, row: 4, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(threeC)
+        
+        //エネルギーを配置する
+        self.setEnegy()
         
         print(self.board.description)
         
@@ -346,6 +351,20 @@ class GameScene: SKScene {
                         }
                         
                     }
+                    
+                    if self.board.itemCells[routes[routeNum][0],routes[routeNum][1]] == .Enegy {
+                        
+                        //画像を消す
+                        self.board.itemCells[routes[routeNum][0],routes[routeNum][1]] = .Empty
+                        if let prevEnegy = self.itemNodes[routes[routeNum][0],routes[routeNum][1]] {
+                            prevEnegy.removeFromParent()
+                        }
+                        //味方のレベルを上昇させる
+                        ally.EnegyLevel = ally.EnegyLevel + 1
+                        print("\(ally.Name):\(ally.EnegyLevel)")
+                        
+                    }
+                    
                 }
                 
                 node?.run(SKAction.sequence(SKActionArray))
@@ -402,6 +421,30 @@ class GameScene: SKScene {
         self.routeNodes[row,column] = newNode
         
     }
+    
+    func setEnegy() {
+        
+        for _ in 0 ..< 6 {//最大6つエネルギーを追加する.
+            
+            let enegyRow:Int = Int.random(in: 0..<6)
+            let enegyColumn:Int = Int.random(in: 0..<8)
+            
+            if self.board.cells[enegyRow,enegyColumn] == .Empty && self.board.itemCells[enegyRow,enegyColumn] == .Empty {
+                
+                let newEnegy = SKSpriteNode(imageNamed: "enegy")
+                newEnegy.size = CGSize(width: SquareSize, height: SquareSize)
+                newEnegy.position = self.convertPointOnLayer(row: enegyRow, column: enegyColumn)
+                
+                self.board.itemCells[enegyRow,enegyColumn] = .Enegy
+                self.itemLayer.addChild(newEnegy)
+                self.itemNodes[enegyRow,enegyColumn] = newEnegy
+                
+            }
+            
+        }
+        
+    }
+    
     
     func setAttackButton() {
         
