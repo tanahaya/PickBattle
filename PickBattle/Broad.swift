@@ -46,6 +46,27 @@ class Board {
         
     }
     
+    var itemDescription: String {
+        
+        var columns = Array<String>()
+        
+        for column in 0..<BoardSizeYColumn {
+            var cells = Array<String>()
+            
+            for row in 0 ..< BoardSizeXRow {
+                if let state = self.itemCells[row,column] {
+                    cells.append(String(state.rawValue))
+                }
+            }
+            
+            let line:String = cells.joined(separator: "")
+            columns.append(line)
+        }
+        
+        return columns.reversed().joined(separator: "\n")
+        
+    }
+    
 }
 
 

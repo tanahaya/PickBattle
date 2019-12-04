@@ -250,7 +250,7 @@ class GameScene: SKScene {
         let twoB:Character = Character(Id: 2, Name: "two", Attack: 1, Defence: 1, MaxHp: 50, Move: 5)//twoというキャラクターを用意
         self.addCharacterBoard(character: twoB, row: 2, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(twoB)
-
+        
         let threeC:Character = Character(Id: 3, Name: "three", Attack: 1, Defence: 1, MaxHp: 50, Move: 6)//threeというキャラクターを用意
         self.addCharacterBoard(character: threeC, row: 4, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(threeC)
@@ -394,6 +394,8 @@ class GameScene: SKScene {
             
             print(self.board.description)
             
+            self.setEnegy()
+            
         }
         
         
@@ -424,7 +426,21 @@ class GameScene: SKScene {
     
     func setEnegy() {
         
-        for _ in 0 ..< 6 {//最大6つエネルギーを追加する.
+        var numberOfEnegy:Int = 0
+        
+        for row in 0 ..< BoardSizeXRow { //.routeを.emptyに直す
+            for column in 0 ..< BoardSizeYColumn {
+                
+                if self.board.itemCells[row,column] == .Enegy {
+                    numberOfEnegy = numberOfEnegy + 1
+                }
+                
+            }
+        }
+        
+        var addNumberOfEnegy = 6 - numberOfEnegy
+        
+        while addNumberOfEnegy > 0 {
             
             let enegyRow:Int = Int.random(in: 0..<6)
             let enegyColumn:Int = Int.random(in: 0..<8)
@@ -438,6 +454,8 @@ class GameScene: SKScene {
                 self.board.itemCells[enegyRow,enegyColumn] = .Enegy
                 self.itemLayer.addChild(newEnegy)
                 self.itemNodes[enegyRow,enegyColumn] = newEnegy
+                
+                addNumberOfEnegy = addNumberOfEnegy - 1
                 
             }
             
