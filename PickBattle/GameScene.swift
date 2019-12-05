@@ -15,6 +15,7 @@ class GameScene: SKScene {
     let disksLayer = SKNode()//キャラクターの情報を表示する
     let itemLayer = SKNode()//アイテムの情報を表示する
     let routesLayer = SKNode()//ルートの情報を表示する
+    let alertLayer = SKNode()//アラートの情報を表示する
     let effectLayer = SKNode()//エフェクトの情報を表示する
     
     //ボード上のキャラクター画像の管理をdiskNodesで行う
@@ -23,17 +24,22 @@ class GameScene: SKScene {
     var itemNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
     //ルートの情報を管理する
     var routeNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
+    //アラートの画像情報を管理する
+    var alertNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
     //エフェクトの情報を管理する
     var effectNodes = Array2D<SKSpriteNode>(rows: BoardSizeXRow, columns: BoardSizeYColumn)
     //ボードの情報を管理する。キャラクターとその状態
     var board:Board!
     
+    //キャラクターの画像を整理
     let DiskAllysImageNames = [1: "ally1",2: "ally2",3: "ally3"]
     let DiskEnemiesImageNames = [1: "enemy1",2: "enemy2",3: "enemy3"]
     
+    //ルートの画像を整理
     let routeImageNames = [1: "Route1",2: "Route2",3: "Route3",4: "Route4",5: "Route5",6: "Route6"]
     let EndPointImageNames = [1: "EndPoint1",2: "EndPoint2",3: "EndPoint3",4: "EndPoint4"]
     
+    //攻撃エフェクトの画像を整理
     let AttackEffectImageNames = [1:"AttackEffect1"]
     
     //マス目のサイズを用意
@@ -70,6 +76,9 @@ class GameScene: SKScene {
         
         self.disksLayer.position = layerPosition
         self.gameLayer.addChild(disksLayer)
+        
+        self.alertLayer.position = layerPosition
+        self.gameLayer.addChild(alertLayer)
         
         self.effectLayer.position = layerPosition
         self.gameLayer.addChild(effectLayer)
@@ -138,98 +147,8 @@ class GameScene: SKScene {
         
         if let (row,column) = self.convertPointOnBoard(point: location) {
             
-            if let state = self.board.cells[row,column] {
-                
-                if state == .Empty {
-                    
-                    if let LastRoute = OperatingCharacter?.Routes.last {
-                        
-                        if LastRoute != [row,column] {
-                            
-                            if (LastRoute[0] - 1 == row && LastRoute[1] == column) || (LastRoute[1] - 1 == column && LastRoute[0] == row) || (LastRoute[0] + 1 == row && LastRoute[1] == column) || (LastRoute[1] + 1 == column && LastRoute[0] == row) {
-                                
-                                if (OperatingCharacter?.Move)! >= (OperatingCharacter?.Routes.count)! {
-                                    
-                                    OperatingCharacter?.Routes.append([row,column])//ルートを追加します
-                                    self.board.cells[row,column] = .Route
-                                    
-                                    //以下ルートを表示のためのコード
-                                    let routes = OperatingCharacter?.Routes
-                                                               
-                                    if routes?.count  == 2 {
-                                                                   
-                                        let lastSquare = routes![1]
-                                        let secondlastSquare = routes![0]
-                                                                   
-                                        if secondlastSquare[1] + 1 == lastSquare[1] {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 1)
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
-                                        }
-                                        if secondlastSquare[0] + 1 == lastSquare[0] {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 2)
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
-                                        }
-                                        if secondlastSquare[1] - 1 == lastSquare[1] {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 3)
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
-                                        }
-                                        if secondlastSquare[0] - 1 == lastSquare[0] {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 4)
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
-                                        }
-                                        
-                                    } else if (routes?.count)! >= 3 {
-                                                                   
-                                        let lastSquare = routes![routes!.count - 1]
-                                        let secondlastSquare = routes![routes!.count - 2]
-                                        let thirdlastSquare = routes![routes!.count - 3]
-                                        
-                                        if secondlastSquare[1] + 1 == lastSquare[1] {
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
-                                        }
-                                        if secondlastSquare[0] + 1 == lastSquare[0] {
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
-                                        }
-                                        if secondlastSquare[1] - 1 == lastSquare[1] {
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
-                                        }
-                                        if secondlastSquare[0] - 1 == lastSquare[0] {
-                                            self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
-                                        }
-                                                                   
-                                                                   
-                                        if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 1)
-                                        }
-                                        if (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[1] + 1 == lastSquare[1]) {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 2)
-                                        }
-                                        if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 3)
-                                        }
-                                        if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 4)
-                                        }
-                                        if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[0] - 1 == lastSquare[0]) || (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[0] + 1 == lastSquare[0]) {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 5)
-                                        }
-                                        if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
-                                            self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 6)
-                                        }
-                                                                   
-                                    }
-                                    
-                                }
-                                
-                            }
-                            
-                        }
-                        
-                    }
-                    
-                }
-                
-            }
+            self.makeRoute(row: row, column: column)
+            
         }
         
     }
@@ -265,10 +184,9 @@ class GameScene: SKScene {
         // let waitTime:Double = 0.0
         
         //会話の処理
-        self.conversation()
+        self.enemiesAlert()
         //エネルギーの生成
         self.setEnegy()
-        
         
     }
     
@@ -286,6 +204,8 @@ class GameScene: SKScene {
             
             //敵の死亡判定
             self.enemiesJudgeAlive()
+            //アラートの削除
+            self.deleteEnemiesAlert()
             //敵の移動と攻撃
             self.enemiesMoveAttack()
             //味方の死亡判定
@@ -297,6 +217,97 @@ class GameScene: SKScene {
             //アタックボタンを有効化する
             self.enableAttackButton()
             
+        }
+        
+    }
+    
+    func makeRoute(row:Int,column:Int) {
+        
+        if let state = self.board.cells[row,column] {
+            
+            if state == .Empty {
+                
+                if let LastRoute = OperatingCharacter?.Routes.last {
+                    
+                    if LastRoute != [row,column] {
+                        
+                        if (LastRoute[0] - 1 == row && LastRoute[1] == column) || (LastRoute[1] - 1 == column && LastRoute[0] == row) || (LastRoute[0] + 1 == row && LastRoute[1] == column) || (LastRoute[1] + 1 == column && LastRoute[0] == row) {
+                            
+                            if (OperatingCharacter?.Move)! >= (OperatingCharacter?.Routes.count)! {
+                                
+                                OperatingCharacter?.Routes.append([row,column])//ルートを追加します
+                                self.board.cells[row,column] = .Route
+                                
+                                //以下ルートを表示のためのコード
+                                let routes = OperatingCharacter?.Routes
+                                                           
+                                if routes?.count  == 2 {
+                                                               
+                                    let lastSquare = routes![1]
+                                    let secondlastSquare = routes![0]
+                                                               
+                                    if secondlastSquare[1] + 1 == lastSquare[1] {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 1)
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
+                                    }
+                                    if secondlastSquare[0] + 1 == lastSquare[0] {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 2)
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
+                                    }
+                                    if secondlastSquare[1] - 1 == lastSquare[1] {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 3)
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
+                                    }
+                                    if secondlastSquare[0] - 1 == lastSquare[0] {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: true, number: 4)
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
+                                    }
+                                    
+                                } else if (routes?.count)! >= 3 {
+                                                               
+                                    let lastSquare = routes![routes!.count - 1]
+                                    let secondlastSquare = routes![routes!.count - 2]
+                                    let thirdlastSquare = routes![routes!.count - 3]
+                                    
+                                    if secondlastSquare[1] + 1 == lastSquare[1] {
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 3)
+                                    }
+                                    if secondlastSquare[0] + 1 == lastSquare[0] {
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 4)
+                                    }
+                                    if secondlastSquare[1] - 1 == lastSquare[1] {
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 1)
+                                    }
+                                    if secondlastSquare[0] - 1 == lastSquare[0] {
+                                        self.setRouteImage(row: lastSquare[0], column: lastSquare[1], PointFlag: true, number: 2)
+                                    }
+                                                               
+                                                               
+                                    if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 1)
+                                    }
+                                    if (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[1] + 1 == lastSquare[1]) {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 2)
+                                    }
+                                    if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] + 1 == lastSquare[1]) || (thirdlastSquare[1] - 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 3)
+                                    }
+                                    if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 4)
+                                    }
+                                    if (thirdlastSquare[0] - 1 == secondlastSquare[0]  && secondlastSquare[0] - 1 == lastSquare[0]) || (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[0] + 1 == lastSquare[0]) {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 5)
+                                    }
+                                    if (thirdlastSquare[0] + 1 == secondlastSquare[0]  && secondlastSquare[1] - 1 == lastSquare[1]) || (thirdlastSquare[1] + 1 == secondlastSquare[1]  && secondlastSquare[0] - 1 == lastSquare[0]) {
+                                        self.setRouteImage(row: secondlastSquare[0], column: secondlastSquare[1], PointFlag: false, number: 6)
+                                    }
+                                                               
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         
     }
@@ -460,6 +471,8 @@ class GameScene: SKScene {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + waitTime) {
             
+            var waitingTime = 0.0
+            
             for ally in self.Allys {
                 
                 for i in 0 ..< ally.EnegyLevel {
@@ -492,7 +505,7 @@ class GameScene: SKScene {
                                 let activeRange = [ally.Point[0] + range[0],ally.Point[1] + range[1]]
                                 
                                 if activeRange[0] >= 0 && activeRange[0] < 6 && activeRange[1] >= 0 && activeRange[1] < 8 {
-                                    self.AttackEffect(row: activeRange[0], column: activeRange[1],wait: waitTime)
+                                    self.AttackEffect(row: activeRange[0], column: activeRange[1],wait: waitingTime)
                                 }
                                 
                                 if self.board.cells[activeRange[0],activeRange[1]] == .Enemy {
@@ -507,6 +520,8 @@ class GameScene: SKScene {
                         } else if attackSkill?.skillType == .heal {
                             
                         }
+                        
+                        waitingTime = waitingTime + 0.5
                         
                     }
                     
@@ -529,14 +544,105 @@ class GameScene: SKScene {
         
     }
     
-    //敵は個々に移動と攻撃を行うため処理を一緒にしております.
-    func enemiesMoveAttack () {
+    //敵のアラートをやります
+    func enemiesAlert() {
+        
+        for enemy in Enemies {
+            
+            if let enemySkill =  enemy.ActiveSkill0 {
+                if enemySkill.skillType == .alert {
+                    
+                    for range in enemySkill.range {
+                        
+                        print("alert: \(range[0]) ,\(range[1])")
+                        
+                        let redAlert = SKSpriteNode(color: UIColor.red, size: CGSize(width: SquareSize, height: SquareSize))
+                        redAlert.alpha = 0.3
+                        redAlert.position = self.convertPointOnLayer(row: range[0], column: range[1])
+                        
+                        self.alertLayer.addChild(redAlert)
+                        self.alertNodes[range[0],range[1]] = redAlert
+                        
+                    }
+                    
+                }
+            }
+        }
         
     }
     
-    //味方と敵の会話についてここでやります。アラートとかもここでやります
-    func conversation() {
+    func deleteEnemiesAlert(){
         
+        for row in 0 ..< BoardSizeXRow { //.routeを.emptyに直す
+            for column in 0 ..< BoardSizeYColumn {
+                
+                if let prevAlert = self.alertNodes[row,column] {
+                    prevAlert.removeFromParent()
+                }
+                
+            }
+        }
+        
+    }
+    
+    //敵は個々に移動と攻撃を行うため処理を一緒にしております.
+    func enemiesMoveAttack () {
+        
+        var waitingTime = 0.0
+        
+        for enemy in Enemies {
+            
+            for i in 0 ..< enemy.EnegyLevel {
+                
+                var attackSkill:Skill?
+                
+                switch i {
+                    
+                    case 0:
+                        attackSkill = enemy.ActiveSkill0
+                    case 1:
+                        attackSkill = enemy.ActiveSkill1
+                    case 2:
+                        attackSkill = enemy.ActiveSkill2
+                    case 3:
+                        attackSkill = enemy.ActiveSkill3
+                    default:
+                        attackSkill = enemy.ActiveSkill0
+                    
+                }
+                
+                if attackSkill != nil {
+                    
+                    let attackRanges = attackSkill?.range
+                    
+                    if attackSkill?.skillType == .attack {
+                        
+                    } else if attackSkill?.skillType == .heal {
+                        
+                    } else if attackSkill?.skillType == .alert {
+                        
+                        for range in attackRanges! {
+                            
+                            if range[0] >= 0 && range[0] < 6 && range[1] >= 0 && range[1] < 8 {
+                                self.AttackEffect(row: range[0], column: range[1],wait: waitingTime)
+                            }
+                            
+                            if self.board.cells[range[0],range[1]] == .Ally {
+                                
+                                let ally = self.board.characterCells[range[0],range[1]]
+                                self.damageAllyHp(damage: Int(Double(enemy.Attack!) * attackSkill!.magnification), ally: ally!)
+                                
+                            }
+                        }
+                        
+                    }
+                }
+                
+                waitingTime = waitingTime + 0.5
+                
+            }
+            
+        }
     }
     
     //攻撃のエフェクトを追加する。
@@ -566,6 +672,15 @@ class GameScene: SKScene {
         print("beforeHp:\(enemy.Hp!)")
         enemy.Hp! = enemy.Hp! - damage
         print("afterHp:\(enemy.Hp!)")
+        
+    }
+    
+    //味方のhpを減らすメソッド
+    func damageAllyHp(damage:Int,ally:Character) {
+        
+        print("beforeHp:\(ally.Hp!)")
+        ally.Hp! = ally.Hp! - damage
+        print("afterHp:\(ally.Hp!)")
         
     }
     
@@ -769,12 +884,9 @@ class GameScene: SKScene {
         self.Allys.append(threeC)
         
         //敵の生成
-        let firstA:Character = Character(Id: 1, Name: "first", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        let firstA:Character = Character(Id: 1, Name: "first", Attack: 30, Defence: 1, MaxHp: 10, Move: 4,Side: .enemy)
         self.addCharacterBoard(character: firstA, row: 0, column: 6)
-        oneA.ActiveSkill0 = Skill(id: 2, name: "", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
-        oneA.ActiveSkill1 = Skill(id: 2, name: "", magnification: 1.0, range: [[-1,1],[-1,0],[-1,0]], skillType: .attack)
-        oneA.ActiveSkill2 = Skill(id: 2, name: "", magnification: 2.0, range: [[0,1],[0,-1]], skillType: .attack)
-        oneA.ActiveSkill3 = Skill(id: 1, name: "tate", magnification: 3.0, range: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],[0,-3],[0,-4],[0,-5],[0,-6],[0,-7]], skillType: .attack)
+        firstA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .alert)
         self.Enemies.append(firstA)
         
         //    let secondB:Character = Character(Id: 2, Name: "second", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
