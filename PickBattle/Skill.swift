@@ -28,7 +28,7 @@ class Skill {
     
     enum skillType:Int { //attackが0、healが1
         
-        case attack = 0,heal
+        case attack = 0,aim,heal,alert
         
     }
     

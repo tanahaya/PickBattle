@@ -77,6 +77,9 @@ class GameScene: SKScene {
         //ボードの初期化
         self.initBoard()
         
+        //ターンを開始する
+        self.turnStart()
+        
         //アタックボタン
         self.setAttackButton()
         
@@ -121,7 +124,8 @@ class GameScene: SKScene {
         
         if self.gameLayer.atPoint(gameLocation).name == "AttackButton" {
             
-            self.move()
+            self.turnEnd()
+            self.AttackButton.name = ""
             
         }
         
@@ -245,49 +249,55 @@ class GameScene: SKScene {
         
         //ボードのインスタンスを生成
         self.board = Board()
-        
-        //味方の生成
-        let oneA:Character = Character(Id: 1, Name: "one", Attack: 10, Defence: 1, MaxHp: 50, Move: 4,Side: .ally)//oneeというキャラクターを用意
-        oneA.ActiveSkill0 = Skill(id: 2, name: "", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
-        oneA.ActiveSkill1 = Skill(id: 2, name: "", magnification: 1.0, range: [[-1,1],[-1,0],[-1,0]], skillType: .attack)
-        oneA.ActiveSkill2 = Skill(id: 2, name: "", magnification: 2.0, range: [[0,1],[0,-1]], skillType: .attack)
-        oneA.ActiveSkill3 = Skill(id: 1, name: "tate", magnification: 3.0, range: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],[0,-3],[0,-4],[0,-5],[0,-6],[0,-7]], skillType: .attack)
-        self.addCharacterBoard(character: oneA, row: 0, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
-        self.Allys.append(oneA)
-        
-        let twoB:Character = Character(Id: 2, Name: "two", Attack: 10, Defence: 1, MaxHp: 50, Move: 5,Side: .ally)//twoというキャラクターを用意
-        twoB.ActiveSkill0 = Skill(id: 1, name: "yoko", magnification: 1.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .attack)
-        twoB.ActiveSkill1 = Skill(id: 1, name: "yoko", magnification: 1.0, range: [[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
-        twoB.ActiveSkill2 = Skill(id: 1, name: "yoko", magnification: 1.0, range: [[1,1],[0,1],[-1,1],[1,-1],[0,-1],[-1,-1]], skillType: .attack)
-        twoB.ActiveSkill3 = Skill(id: 1, name: "yoko", magnification: 2.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
-        self.addCharacterBoard(character: twoB, row: 2, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
-        self.Allys.append(twoB)
-        
-        let threeC:Character = Character(Id: 3, Name: "three", Attack: 10, Defence: 1, MaxHp: 50, Move: 6,Side: .ally)//threeというキャラクターを用意
-        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
-        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 1.0, range: [[0,1],[0,-1]], skillType: .attack)
-        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 1.0, range: [[-1,-1],[-1,0],[-1,1]], skillType: .attack)
-        threeC.ActiveSkill0 = Skill(id: 1, name: "syuui", magnification: 2.0, range: [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]], skillType: .attack)
-        self.addCharacterBoard(character: threeC, row: 4, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
-        self.Allys.append(threeC)
-        
-        //敵の生成
-        let firstA:Character = Character(Id: 1, Name: "first", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
-        self.addCharacterBoard(character: firstA, row: 0, column: 6)
-        self.Enemies.append(firstA)
-        
-        let secondB:Character = Character(Id: 2, Name: "second", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
-        self.addCharacterBoard(character: secondB, row: 2, column: 6)
-        self.Enemies.append(secondB)
-        
-        let thirdC:Character = Character(Id: 3, Name: "third", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
-        self.addCharacterBoard(character: thirdC, row: 4, column: 6)
-        self.Enemies.append(thirdC)
-        
+        //キャラクターの追加
+        self.SampleCharacter()
         //エネルギーを配置する
         self.setEnegy()
         
         print(self.board.description)
+        
+    }
+    
+    //ターンのはじめから味方の移動までの処理をまとめる
+    func turnStart() {
+        
+        //時間的な処理を統一するためのタイマー
+        // let waitTime:Double = 0.0
+        
+        //会話の処理
+        self.conversation()
+        //エネルギーの生成
+        self.setEnegy()
+        
+        
+    }
+    
+    //AttackButtonを押してからターンエンドまでの処理をまとめる
+    func turnEnd() {
+        
+        //時間的な処理を統一するためのタイマー
+        var waitTime:Double = 0.0
+        //移動
+        waitTime = waitTime + self.allysMove(waitTime: waitTime)
+        //攻撃
+        waitTime = waitTime + self.allysAttack(waitTime: waitTime)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + waitTime) {
+            
+            //敵の死亡判定
+            self.enemiesJudgeAlive()
+            //敵の移動と攻撃
+            self.enemiesMoveAttack()
+            //味方の死亡判定
+            self.allysJudegeAlive()
+            //味方のエネルギーレベルのリセット
+            self.resetAllysEnegyLevel()
+            //ターン開始を呼ぶ
+            self.turnStart()
+            //アタックボタンを有効化する
+            self.enableAttackButton()
+            
+        }
         
     }
     
@@ -333,7 +343,7 @@ class GameScene: SKScene {
         
     }
     
-    func move() {
+    func allysMove(waitTime:Double) -> (Double) {
         
         var maxMove:Int = 0
         
@@ -440,76 +450,92 @@ class GameScene: SKScene {
             
             print(self.board.description)
             
-            let waitTime = self.allysAttack()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + waitTime ) {
-                
-                self.judgeAlive()
-                self.setEnegy()
-                self.resetAllysEnegyLevel()
-                
-            }
         }
         
+        return 0.5 * Double(maxMove - 1)
         
     }
     
-    func allysAttack() -> (Double) {
+    func allysAttack(waitTime:Double) -> (Double) {
         
-        var waitTime = 0.0
-        
-        for ally in Allys {
+        DispatchQueue.main.asyncAfter(deadline: .now() + waitTime) {
             
-            for i in 0 ..< ally.EnegyLevel {
+            for ally in self.Allys {
                 
-                var attackSkill:Skill?
-                
-                switch i {
+                for i in 0 ..< ally.EnegyLevel {
                     
-                    case 0:
-                        attackSkill = ally.ActiveSkill0
-                    case 1:
-                        attackSkill = ally.ActiveSkill1
-                    case 2:
-                        attackSkill = ally.ActiveSkill2
-                    case 3:
-                        attackSkill = ally.ActiveSkill3
-                    default:
-                        attackSkill = ally.ActiveSkill0
+                    var attackSkill:Skill?
                     
-                }
-                
-                let attackRanges = attackSkill?.range
-                
-                if attackSkill?.skillType == .attack {
-                    
-                    for range in attackRanges! {
+                    switch i {
                         
-                        let activeRange = [ally.Point[0] + range[0],ally.Point[1] + range[1]]
+                        case 0:
+                            attackSkill = ally.ActiveSkill0
+                        case 1:
+                            attackSkill = ally.ActiveSkill1
+                        case 2:
+                            attackSkill = ally.ActiveSkill2
+                        case 3:
+                            attackSkill = ally.ActiveSkill3
+                        default:
+                            attackSkill = ally.ActiveSkill0
                         
-                        if activeRange[0] >= 0 && activeRange[0] < 6 && activeRange[1] >= 0 && activeRange[1] < 8 {
-                            self.AttackEffect(row: activeRange[0], column: activeRange[1],wait: waitTime)
-                        }
-                        
-                        if self.board.cells[activeRange[0],activeRange[1]] == .Enemy {
-                            
-                            print("Attack")
-                            let enemy = self.board.characterCells[activeRange[0],activeRange[1]]
-                            self.damageEnemyHp(damage: Int(Double(ally.Attack!) * attackSkill!.magnification), enemy: enemy!)
-                            
-                        }
                     }
                     
-                } else if attackSkill?.skillType == .heal {
+                    if attackSkill != nil {
+                        
+                        let attackRanges = attackSkill?.range
+                        
+                        if attackSkill?.skillType == .attack {
+                            
+                            for range in attackRanges! {
+                                
+                                let activeRange = [ally.Point[0] + range[0],ally.Point[1] + range[1]]
+                                
+                                if activeRange[0] >= 0 && activeRange[0] < 6 && activeRange[1] >= 0 && activeRange[1] < 8 {
+                                    self.AttackEffect(row: activeRange[0], column: activeRange[1],wait: waitTime)
+                                }
+                                
+                                if self.board.cells[activeRange[0],activeRange[1]] == .Enemy {
+                                    
+                                    print("Attack")
+                                    let enemy = self.board.characterCells[activeRange[0],activeRange[1]]
+                                    self.damageEnemyHp(damage: Int(Double(ally.Attack!) * attackSkill!.magnification), enemy: enemy!)
+                                    
+                                }
+                            }
+                            
+                        } else if attackSkill?.skillType == .heal {
+                            
+                        }
+                        
+                    }
                     
                 }
+            }
+            
+        }
+        
+        var attackWaitTime = 0.0
+        
+        for ally in Allys {
+            for _ in 0 ..< ally.EnegyLevel {
                 
-                waitTime = waitTime + 0.5
+                attackWaitTime = attackWaitTime + 0.5
                 
             }
         }
         
-        return waitTime
+        return attackWaitTime
+        
+    }
+    
+    //敵は個々に移動と攻撃を行うため処理を一緒にしております.
+    func enemiesMoveAttack () {
+        
+    }
+    
+    //味方と敵の会話についてここでやります。アラートとかもここでやります
+    func conversation() {
         
     }
     
@@ -544,7 +570,7 @@ class GameScene: SKScene {
     }
     
     //生死を判定する。
-    func judgeAlive() {
+    func enemiesJudgeAlive() {
         
         for enemy in Enemies {
             
@@ -573,6 +599,43 @@ class GameScene: SKScene {
             }
             
         }
+    }
+    
+    func allysJudegeAlive() {
+        
+        for ally in Allys {
+            
+            if ally.Hp! <= 0 {
+                
+                //敵の死亡処理
+                let point = [ally.Point[0],ally.Point[1]]
+                
+                //画像の削除
+                let fadeOut = SKAction.fadeOut(withDuration: 0.5)
+                fadeOut.timingMode = .easeIn
+                let remove = SKAction.removeFromParent()
+                
+                let allyImage = self.diskNodes[point[0],point[1]]
+                allyImage?.run(SKAction.sequence([fadeOut,remove]))
+                
+                //情報の削除
+                self.board.cells[point[0],point[1]] = .Empty
+                self.board.characterCells[point[0],point[1]] = nil
+                
+                //敵の配列から排除する
+                if let i = Allys.firstIndex(of: ally) {
+                    Allys.remove(at: i)
+                }
+                
+            }
+            
+            
+        }
+        
+    }
+    
+    func enableAttackButton() {
+        AttackButton.name = "AttackButton"
     }
     
     func resetAllysEnegyLevel() {
@@ -674,6 +737,53 @@ class GameScene: SKScene {
         } else {
             return nil
         }
+        
+    }
+    
+    
+    func SampleCharacter() {
+        
+        //味方の生成
+        let oneA:Character = Character(Id: 1, Name: "one", Attack: 10, Defence: 1, MaxHp: 50, Move: 4,Side: .ally)//oneeというキャラクターを用意
+        oneA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
+        oneA.ActiveSkill1 = Skill(id: 2, name: "", magnification: 1.0, range: [[-1,1],[-1,0],[-1,0]], skillType: .attack)
+        oneA.ActiveSkill2 = Skill(id: 3, name: "", magnification: 2.0, range: [[0,1],[0,-1]], skillType: .attack)
+        oneA.ActiveSkill3 = Skill(id: 4, name: "tate", magnification: 3.0, range: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],[0,-3],[0,-4],[0,-5],[0,-6],[0,-7]], skillType: .attack)
+        self.addCharacterBoard(character: oneA, row: 0, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.Allys.append(oneA)
+                
+        let twoB:Character = Character(Id: 2, Name: "two", Attack: 10, Defence: 1, MaxHp: 50, Move: 5,Side: .ally)//twoというキャラクターを用意
+        twoB.ActiveSkill0 = Skill(id: 5, name: "yoko", magnification: 1.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .attack)
+        twoB.ActiveSkill1 = Skill(id: 6, name: "yoko", magnification: 1.0, range: [[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
+        twoB.ActiveSkill2 = Skill(id: 7, name: "yoko", magnification: 1.0, range: [[1,1],[0,1],[-1,1],[1,-1],[0,-1],[-1,-1]], skillType: .attack)
+        twoB.ActiveSkill3 = Skill(id: 8, name: "yoko", magnification: 2.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
+        self.addCharacterBoard(character: twoB, row: 2, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.Allys.append(twoB)
+                
+        let threeC:Character = Character(Id: 3, Name: "three", Attack: 10, Defence: 1, MaxHp: 50, Move: 6,Side: .ally)//threeというキャラクターを用意
+        threeC.ActiveSkill0 = Skill(id: 9, name: "syuui", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
+        threeC.ActiveSkill0 = Skill(id: 10, name: "syuui", magnification: 1.0, range: [[0,1],[0,-1]], skillType: .attack)
+        threeC.ActiveSkill0 = Skill(id: 11, name: "syuui", magnification: 1.0, range: [[-1,-1],[-1,0],[-1,1]], skillType: .attack)
+        threeC.ActiveSkill0 = Skill(id: 12, name: "syuui", magnification: 2.0, range: [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]], skillType: .attack)
+        self.addCharacterBoard(character: threeC, row: 4, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.Allys.append(threeC)
+        
+        //敵の生成
+        let firstA:Character = Character(Id: 1, Name: "first", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        self.addCharacterBoard(character: firstA, row: 0, column: 6)
+        oneA.ActiveSkill0 = Skill(id: 2, name: "", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
+        oneA.ActiveSkill1 = Skill(id: 2, name: "", magnification: 1.0, range: [[-1,1],[-1,0],[-1,0]], skillType: .attack)
+        oneA.ActiveSkill2 = Skill(id: 2, name: "", magnification: 2.0, range: [[0,1],[0,-1]], skillType: .attack)
+        oneA.ActiveSkill3 = Skill(id: 1, name: "tate", magnification: 3.0, range: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],[0,-3],[0,-4],[0,-5],[0,-6],[0,-7]], skillType: .attack)
+        self.Enemies.append(firstA)
+        
+        //    let secondB:Character = Character(Id: 2, Name: "second", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        //    self.addCharacterBoard(character: secondB, row: 2, column: 6)
+        //    self.Enemies.append(secondB)
+        //
+        //    let thirdC:Character = Character(Id: 3, Name: "third", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        //    self.addCharacterBoard(character: thirdC, row: 4, column: 6)
+        //    self.Enemies.append(thirdC)
         
     }
     
