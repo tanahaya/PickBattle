@@ -588,61 +588,92 @@ class GameScene: SKScene {
     //敵は個々に移動と攻撃を行うため処理を一緒にしております.
     func enemiesMoveAttack () {
         
-        var waitingTime = 0.0
+        let waitingTime = 0.0
         
         for enemy in Enemies {
             
-            for i in 0 ..< enemy.EnegyLevel {
+            if enemy.ActiveSkill0?.skillType == .attack {
                 
-                var attackSkill:Skill?
+                let answer = self.judgeMoveRange(enemy: enemy, Ranges: [[enemy.Point[0],enemy.Point[1]]],Move: enemy.Move!,first: true)
+                //print(self.judgeMoveRange(enemy: enemy, Ranges: [[enemy.Point[0],enemy.Point[1]]],Move: enemy.Move!,first: true))
                 
-                switch i {
-                    
-                    case 0:
-                        attackSkill = enemy.ActiveSkill0
-                    case 1:
-                        attackSkill = enemy.ActiveSkill1
-                    case 2:
-                        attackSkill = enemy.ActiveSkill2
-                    case 3:
-                        attackSkill = enemy.ActiveSkill3
-                    default:
-                        attackSkill = enemy.ActiveSkill0
-                    
+                for i in answer {
+                    print("route:\(i) + \(String(describing: enemy.MoveFiled[i[0],i[1]]))")
                 }
                 
-                if attackSkill != nil {
+                
+            } else if enemy.ActiveSkill0?.skillType == .heal {
+                
+            } else if enemy.ActiveSkill0?.skillType == .alert {
+                
+                let attackRanges = enemy.ActiveSkill0?.range
+                
+                for range in attackRanges! {
                     
-                    let attackRanges = attackSkill?.range
+                    if range[0] >= 0 && range[0] < 6 && range[1] >= 0 && range[1] < 8 {
+                        self.AttackEffect(row: range[0], column: range[1],wait: waitingTime)
+                    }
                     
-                    if attackSkill?.skillType == .attack {
+                    if self.board.cells[range[0],range[1]] == .Ally {
                         
-                    } else if attackSkill?.skillType == .heal {
-                        
-                    } else if attackSkill?.skillType == .alert {
-                        
-                        for range in attackRanges! {
-                            
-                            if range[0] >= 0 && range[0] < 6 && range[1] >= 0 && range[1] < 8 {
-                                self.AttackEffect(row: range[0], column: range[1],wait: waitingTime)
-                            }
-                            
-                            if self.board.cells[range[0],range[1]] == .Ally {
-                                
-                                let ally = self.board.characterCells[range[0],range[1]]
-                                self.damageAllyHp(damage: Int(Double(enemy.Attack!) * attackSkill!.magnification), ally: ally!)
-                                
-                            }
-                        }
+                        let ally = self.board.characterCells[range[0],range[1]]
+                        self.damageAllyHp(damage: Int(Double(enemy.Attack!) * enemy.ActiveSkill0!.magnification), ally: ally!)
                         
                     }
                 }
-                
-                waitingTime = waitingTime + 0.5
-                
             }
             
         }
+    }
+    
+    func judgeMoveRange(enemy:Character,Ranges:[[Int]],Move:Int,first:Bool) -> [[Int]] {
+        
+        let MovedCount:Int = Move - 1
+        var newRange:[[Int]] = []
+        
+        if first {
+            for range in Ranges {
+                enemy.MoveFiled[range[0],range[1]] = Move
+            }
+        }
+        
+        if Move > 0 {
+            
+            for range in Ranges {
+                
+                let upRange = [range[0],range[1] + 1]
+                let downRange = [range[0],range[1] - 1]
+                let rightRange = [range[0] + 1,range[1]]
+                let leftRange = [range[0] - 1,range[1]]
+                
+                if enemy.MoveFiled[upRange[0],upRange[1]] == nil && upRange[0] >= 0 && upRange[0] < 6  && upRange[1] >= 0 && upRange[1] < 8 {
+                    enemy.MoveFiled[upRange[0],upRange[1]] = MovedCount
+                    newRange.append(upRange)
+                }
+                if enemy.MoveFiled[downRange[0],downRange[1]] == nil && downRange[0] >= 0 && downRange[0] < 6  && downRange[1] >= 0 && downRange[1] < 8 {
+                    enemy.MoveFiled[downRange[0],downRange[1]] = MovedCount
+                    newRange.append(downRange)
+                }
+                if enemy.MoveFiled[rightRange[0],rightRange[1]] == nil && rightRange[0] >= 0 && rightRange[0] < 6  && rightRange[1] >= 0 && rightRange[1] < 8 {
+                    enemy.MoveFiled[rightRange[0],rightRange[1]] = MovedCount
+                    newRange.append(rightRange)
+                }
+                if enemy.MoveFiled[leftRange[0],leftRange[1]] == nil && leftRange[0] >= 0 && leftRange[0] < 6  && leftRange[1] >= 0 && leftRange[1] < 8 {
+                    enemy.MoveFiled[leftRange[0],leftRange[1]] = MovedCount
+                    newRange.append(leftRange)
+                }
+                
+                
+            }
+            
+            return newRange + self.judgeMoveRange(enemy: enemy, Ranges: newRange, Move: MovedCount,first: false)
+            
+        } else {
+            
+            return []
+            
+        }
+        
     }
     
     //攻撃のエフェクトを追加する。
@@ -874,7 +905,7 @@ class GameScene: SKScene {
         twoB.ActiveSkill3 = Skill(id: 8, name: "yoko", magnification: 2.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
         self.addCharacterBoard(character: twoB, row: 2, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(twoB)
-                
+        
         let threeC:Character = Character(Id: 3, Name: "three", Attack: 10, Defence: 1, MaxHp: 50, Move: 6,Side: .ally)//threeというキャラクターを用意
         threeC.ActiveSkill0 = Skill(id: 9, name: "syuui", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
         threeC.ActiveSkill0 = Skill(id: 10, name: "syuui", magnification: 1.0, range: [[0,1],[0,-1]], skillType: .attack)
@@ -884,9 +915,10 @@ class GameScene: SKScene {
         self.Allys.append(threeC)
         
         //敵の生成
-        let firstA:Character = Character(Id: 1, Name: "first", Attack: 30, Defence: 1, MaxHp: 10, Move: 4,Side: .enemy)
-        self.addCharacterBoard(character: firstA, row: 0, column: 6)
-        firstA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .alert)
+        let firstA:Character = Character(Id: 1, Name: "first", Attack: 30, Defence: 1, MaxHp: 10, Move: 2,Side: .enemy)
+        self.addCharacterBoard(character: firstA, row: 1, column: 6)
+        //firstA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .alert)
+        firstA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[1,0],[0,1],[-1,0],[0,-1]], skillType: .attack)
         self.Enemies.append(firstA)
         
         //    let secondB:Character = Character(Id: 2, Name: "second", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)

@@ -35,6 +35,8 @@ class Character :Equatable {
     var Routes:[[Int]] = []
     var Point:[Int] = []
     var Side:side = .ally //0なら味方、s1なら敵
+    //移動を管理する。ここで宣言する必要があるかどうかは不明。
+    var MoveFiled = Array2D<Int>(rows: BoardSizeXRow, columns: BoardSizeYColumn, repeatedValue: nil)
     
     init (Id:Int,Name:String,Attack:Int,Defence:Int,MaxHp:Int,Move:Int,Side:side) {
         
