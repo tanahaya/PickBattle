@@ -183,7 +183,7 @@ class GameScene: SKScene {
         //時間的な処理を統一するためのタイマー
         // let waitTime:Double = 0.0
         
-        //会話の処理
+        //アラートの処理
         self.enemiesAlert()
         //エネルギーの生成
         self.setEnegy()
@@ -207,15 +207,22 @@ class GameScene: SKScene {
             //アラートの削除
             self.deleteEnemiesAlert()
             //敵の移動と攻撃
-            self.enemiesMoveAttack()
-            //味方の死亡判定
-            self.allysJudegeAlive()
-            //味方のエネルギーレベルのリセット
-            self.resetAllysEnegyLevel()
-            //ターン開始を呼ぶ
-            self.turnStart()
-            //アタックボタンを有効化する
-            self.enableAttackButton()
+            let wait = self.enemiesMoveAttack()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + wait) {
+                
+                //味方の死亡判定
+                self.allysJudegeAlive()
+                //味方のエネルギーレベルのリセット
+                self.resetAllysEnegyLevel()
+                //敵のエネルギーレベルとルートフィールドをリセット
+                self.resetEnemiesEnegyLevel()
+                //ターン開始を呼ぶ
+                self.turnStart()
+                //アタックボタンを有効化する
+                self.enableAttackButton()
+                
+            }
             
         }
         
@@ -316,8 +323,6 @@ class GameScene: SKScene {
         
         if let state = self.board.cells[row,column] {
             
-            print(state)
-            
             if state ==  .Empty {
                 
                 if character.Side == .ally { //追加するキャラクターが味方の時の処理
@@ -376,7 +381,7 @@ class GameScene: SKScene {
                 let GoalRow = (ally.Routes.last?[0])!
                 let GoalColumn = (ally.Routes.last?[1])!
                 
-                print("routes:\(routes)")
+                print("route:\(routes)")
                 
                 let node = diskNodes[startRow,startColumn]
                 
@@ -397,22 +402,22 @@ class GameScene: SKScene {
                         
                         if routes[routeNum][0] < routes[routeNum + 1][0] {
                             
-                            let action = SKAction.moveBy(x: 68, y: 0, duration: 0.5)
+                            let action = SKAction.moveBy(x: 68, y: 0, duration: 0.3)
                             SKActionArray.append(action)
                             
                         } else if routes[routeNum][0] > routes[routeNum + 1][0] {
                             
-                            let action = SKAction.moveBy(x: -68, y: 0, duration: 0.5)
+                            let action = SKAction.moveBy(x: -68, y: 0, duration: 0.3)
                             SKActionArray.append(action)
                             
                         } else if routes[routeNum][1] < routes[routeNum + 1][1] {
                             
-                            let action = SKAction.moveBy(x: 0, y: 68, duration: 0.5)
+                            let action = SKAction.moveBy(x: 0, y: 68, duration: 0.3)
                             SKActionArray.append(action)
                             
                         } else if routes[routeNum][1] > routes[routeNum + 1][1] {
                             
-                            let action = SKAction.moveBy(x: 0, y: -68, duration: 0.5)
+                            let action = SKAction.moveBy(x: 0, y: -68, duration: 0.3)
                             SKActionArray.append(action)
                             
                         }
@@ -442,7 +447,7 @@ class GameScene: SKScene {
             
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5 * Double(maxMove - 1)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3 * Double(maxMove - 1)) {
             
             for row in 0 ..< BoardSizeXRow { //.routeを.emptyに直す
                 for column in 0 ..< BoardSizeYColumn {
@@ -459,11 +464,9 @@ class GameScene: SKScene {
                 }
             }
             
-            print(self.board.description)
-            
         }
         
-        return 0.5 * Double(maxMove - 1)
+        return 0.3 * Double(maxMove - 1)
         
     }
     
@@ -510,7 +513,6 @@ class GameScene: SKScene {
                                 
                                 if self.board.cells[activeRange[0],activeRange[1]] == .Enemy {
                                     
-                                    print("Attack")
                                     let enemy = self.board.characterCells[activeRange[0],activeRange[1]]
                                     self.damageEnemyHp(damage: Int(Double(ally.Attack!) * attackSkill!.magnification), enemy: enemy!)
                                     
@@ -586,20 +588,216 @@ class GameScene: SKScene {
     }
     
     //敵は個々に移動と攻撃を行うため処理を一緒にしております.
-    func enemiesMoveAttack () {
+    func enemiesMoveAttack () -> (Double) {
         
-        let waitingTime = 0.0
+        var waitingTime = 0.0
         
         for enemy in Enemies {
             
             if enemy.ActiveSkill0?.skillType == .attack {
                 
-                let answer = self.judgeMoveRange(enemy: enemy, Ranges: [[enemy.Point[0],enemy.Point[1]]],Move: enemy.Move!,first: true)
-                //print(self.judgeMoveRange(enemy: enemy, Ranges: [[enemy.Point[0],enemy.Point[1]]],Move: enemy.Move!,first: true))
+                //最もダメージ場所を探す
+                let rangeOfEnemy = self.judgeMoveRange(enemy: enemy, Ranges: [[enemy.Point[0],enemy.Point[1]]],Move: enemy.Move!,first: true)
                 
-                for i in answer {
-                    print("route:\(i) + \(String(describing: enemy.MoveFiled[i[0],i[1]]))")
+                var routeAndEnegy:[[Int]:Int] = [:]
+                
+                for i in 0 ..< rangeOfEnemy.count {
+                    
+                    let route = Array(self.judgeMoveRoute(Route: [rangeOfEnemy[i]], enemy: enemy).reversed())
+                    //print("route: \(route)")
+                    routeAndEnegy[route.last!] = self.numberOfEnegy(route: route)
+                    
                 }
+                
+                var maxPointCount = 0.0
+                var maxPoint:[Int] = []
+                
+                for point in rangeOfEnemy {
+                    
+                    let enegyLevel = routeAndEnegy[point]
+                    var pointCount = 0.0
+                    
+                    for level in 0 ..< enegyLevel! {
+                        
+                        var attackSkill:Skill?
+                        
+                        switch level {
+                            
+                            case 0:
+                                attackSkill = enemy.ActiveSkill0
+                            case 1:
+                                attackSkill = enemy.ActiveSkill1
+                            case 2:
+                                attackSkill = enemy.ActiveSkill2
+                            case 3:
+                                attackSkill = enemy.ActiveSkill3
+                            default:
+                                attackSkill = enemy.ActiveSkill0
+                            
+                        }
+                        
+                        if attackSkill != nil {
+                            
+                            let attackRanges = attackSkill?.range
+                            
+                            for range in attackRanges! {
+                                
+                                let activeRange = [point[0] + range[0],point[1] + range[1]]
+                                
+                                if self.board.cells[activeRange[0],activeRange[1]] == .Ally {
+                                    
+                                    pointCount = pointCount + attackSkill!.magnification
+                                    
+                                }
+                            }
+                            
+                        }
+                        
+                    }
+                    
+                    if maxPointCount <= pointCount {
+                        
+                        maxPointCount = pointCount
+                        maxPoint = point
+                        
+                    }
+                    
+                }
+                
+                print("maxPoint :\(maxPoint) ,maxCount:\(maxPointCount)")
+                
+                //こっから実際の移動
+                let praticalRoute = Array(self.judgeMoveRoute(Route: [maxPoint], enemy: enemy).reversed())
+                
+                let startRow = enemy.Point[0]
+                let startColumn = enemy.Point[1]
+                
+                let GoalRow = maxPoint[0]
+                let GoalColumn = maxPoint[1]
+                
+                print("route:\(praticalRoute)")
+                
+                let node = diskNodes[startRow,startColumn]
+                
+                self.board.cells[startRow,startColumn] = .Empty
+                self.board.characterCells[startRow,startColumn] = nil
+                self.diskNodes[startRow,startColumn] = nil
+                
+                self.board.cells[GoalRow,GoalColumn] = .Enemy
+                self.board.characterCells[GoalRow,GoalColumn] = enemy
+                self.diskNodes[GoalRow,GoalColumn] = node
+                enemy.Point = [GoalRow,GoalColumn]
+                
+                var SKActionArray:[SKAction] = []
+                let wait = SKAction.wait(forDuration: waitingTime)
+                SKActionArray.append(wait)
+                
+                for routeNum in 0 ..< praticalRoute.count {
+                    
+                    if routeNum < praticalRoute.count - 1 {
+                        
+                        if praticalRoute[routeNum][0] < praticalRoute[routeNum + 1][0] {
+                            
+                            let action = SKAction.moveBy(x: 68, y: 0, duration: 0.3)
+                            SKActionArray.append(action)
+                            
+                        } else if praticalRoute[routeNum][0] > praticalRoute[routeNum + 1][0] {
+                            
+                            let action = SKAction.moveBy(x: -68, y: 0, duration: 0.3)
+                            SKActionArray.append(action)
+                            
+                        } else if praticalRoute[routeNum][1] < praticalRoute[routeNum + 1][1] {
+                            
+                            let action = SKAction.moveBy(x: 0, y: 68, duration: 0.3)
+                            SKActionArray.append(action)
+                            
+                        } else if praticalRoute[routeNum][1] > praticalRoute[routeNum + 1][1] {
+                            
+                            let action = SKAction.moveBy(x: 0, y: -68, duration: 0.3)
+                            SKActionArray.append(action)
+                            
+                        }
+                        
+                    }
+                    
+                    if self.board.itemCells[praticalRoute[routeNum][0],praticalRoute[routeNum][1]] == .Enegy {
+                        
+                        //画像を消す
+                        self.board.itemCells[praticalRoute[routeNum][0],praticalRoute[routeNum][1]] = .Empty
+                        if let prevEnegy = self.itemNodes[praticalRoute[routeNum][0],praticalRoute[routeNum][1]] {
+                            prevEnegy.removeFromParent()
+                        }
+                        
+                        //味方のレベルを上昇させる
+                        enemy.EnegyLevel = enemy.EnegyLevel + 1
+                        print("\(enemy.Name):\(enemy.EnegyLevel)")
+                        
+                    }
+                    
+                }
+                
+                node?.run(SKAction.sequence(SKActionArray))
+                
+                waitingTime = waitingTime + 0.3 * Double(praticalRoute.count - 1)
+                
+                //ここから攻撃
+                DispatchQueue.main.asyncAfter(deadline: .now() + waitingTime) {
+                    
+                    var waitTime = 0.0
+                    
+                    for i in 0 ..< enemy.EnegyLevel {
+                        
+                        var attackSkill:Skill?
+                        
+                        switch i {
+                            
+                            case 0:
+                                attackSkill = enemy.ActiveSkill0
+                            case 1:
+                                attackSkill = enemy.ActiveSkill1
+                            case 2:
+                                attackSkill = enemy.ActiveSkill2
+                            case 3:
+                                attackSkill = enemy.ActiveSkill3
+                            default:
+                                attackSkill = enemy.ActiveSkill0
+                            
+                        }
+                        
+                        if attackSkill != nil {
+                            
+                            let attackRanges = attackSkill?.range
+                            
+                            if attackSkill?.skillType == .attack {
+                                
+                                for range in attackRanges! {
+                                    
+                                    let activeRange = [enemy.Point[0] + range[0],enemy.Point[1] + range[1]]
+                                    
+                                    if activeRange[0] >= 0 && activeRange[0] < 6 && activeRange[1] >= 0 && activeRange[1] < 8 {
+                                        self.AttackEffect(row: activeRange[0], column: activeRange[1],wait: waitTime)
+                                    }
+                                    
+                                    if self.board.cells[activeRange[0],activeRange[1]] == .Ally {
+                                        
+                                        let ally = self.board.characterCells[activeRange[0],activeRange[1]]
+                                        self.damageAllyHp(damage: Int(Double(enemy.Attack!) * attackSkill!.magnification), ally: ally!)
+                                        
+                                    }
+                                }
+                                
+                            } else if attackSkill?.skillType == .heal {
+                                
+                            }
+                            
+                            waitTime = waitTime + 0.5
+                            
+                        }
+                        
+                    }
+                    
+                }
+                
                 
                 
             } else if enemy.ActiveSkill0?.skillType == .heal {
@@ -624,6 +822,9 @@ class GameScene: SKScene {
             }
             
         }
+        
+        return waitingTime
+        
     }
     
     func judgeMoveRange(enemy:Character,Ranges:[[Int]],Move:Int,first:Bool) -> [[Int]] {
@@ -646,19 +847,19 @@ class GameScene: SKScene {
                 let rightRange = [range[0] + 1,range[1]]
                 let leftRange = [range[0] - 1,range[1]]
                 
-                if enemy.MoveFiled[upRange[0],upRange[1]] == nil && upRange[0] >= 0 && upRange[0] < 6  && upRange[1] >= 0 && upRange[1] < 8 {
+                if enemy.MoveFiled[upRange[0],upRange[1]] == nil && self.board.cells[upRange[0],upRange[1]] == .Empty && upRange[0] >= 0 && upRange[0] < 6  && upRange[1] >= 0 && upRange[1] < 8 {
                     enemy.MoveFiled[upRange[0],upRange[1]] = MovedCount
                     newRange.append(upRange)
                 }
-                if enemy.MoveFiled[downRange[0],downRange[1]] == nil && downRange[0] >= 0 && downRange[0] < 6  && downRange[1] >= 0 && downRange[1] < 8 {
-                    enemy.MoveFiled[downRange[0],downRange[1]] = MovedCount
-                    newRange.append(downRange)
-                }
-                if enemy.MoveFiled[rightRange[0],rightRange[1]] == nil && rightRange[0] >= 0 && rightRange[0] < 6  && rightRange[1] >= 0 && rightRange[1] < 8 {
+                if enemy.MoveFiled[rightRange[0],rightRange[1]] == nil && self.board.cells[rightRange[0],rightRange[1]] == .Empty && rightRange[0] >= 0 && rightRange[0] < 6  && rightRange[1] >= 0 && rightRange[1] < 8 {
                     enemy.MoveFiled[rightRange[0],rightRange[1]] = MovedCount
                     newRange.append(rightRange)
                 }
-                if enemy.MoveFiled[leftRange[0],leftRange[1]] == nil && leftRange[0] >= 0 && leftRange[0] < 6  && leftRange[1] >= 0 && leftRange[1] < 8 {
+                if enemy.MoveFiled[downRange[0],downRange[1]] == nil  && self.board.cells[downRange[0],downRange[1]] == .Empty && downRange[0] >= 0 && downRange[0] < 6  && downRange[1] >= 0 && downRange[1] < 8 {
+                    enemy.MoveFiled[downRange[0],downRange[1]] = MovedCount
+                    newRange.append(downRange)
+                }
+                if enemy.MoveFiled[leftRange[0],leftRange[1]] == nil && self.board.cells[leftRange[0],leftRange[1]] == .Empty && leftRange[0] >= 0 && leftRange[0] < 6  && leftRange[1] >= 0 && leftRange[1] < 8 {
                     enemy.MoveFiled[leftRange[0],leftRange[1]] = MovedCount
                     newRange.append(leftRange)
                 }
@@ -673,6 +874,59 @@ class GameScene: SKScene {
             return []
             
         }
+        
+    }
+    
+    func judgeMoveRoute(Route:[[Int]],enemy:Character) -> [[Int]] {
+        
+        var makingRoute:[[Int]] = Route
+        
+        var startMove = enemy.MoveFiled[Route.last![0],Route.last![1]]
+        
+        let range = [Route.last![0],Route.last![1]]
+        
+        let upRange = [range[0],range[1] + 1]
+        let rightRange = [range[0] + 1,range[1]]
+        let downRange = [range[0],range[1] - 1]
+        let leftRange = [range[0] - 1,range[1]]
+        
+        var nextRange:[Int] = []
+        
+        startMove = startMove! + 1
+        
+        if startMove == enemy.MoveFiled[upRange[0],upRange[1]] {
+            nextRange = upRange
+        } else if startMove == enemy.MoveFiled[rightRange[0],rightRange[1]] {
+            nextRange = rightRange
+        } else if startMove == enemy.MoveFiled[downRange[0],downRange[1]] {
+            nextRange = downRange
+        } else if startMove == enemy.MoveFiled[leftRange[0],leftRange[1]] {
+            nextRange = leftRange
+        }
+        
+        makingRoute.append(nextRange)
+        
+        if nextRange == enemy.Point {
+            
+            return makingRoute
+            
+        } else {
+            return self.judgeMoveRoute(Route: makingRoute, enemy: enemy)
+        }
+        
+    }
+    
+    func numberOfEnegy(route:[[Int]]) -> Int {
+        
+        var count = 1
+        
+        for point in route {
+            if self.board.itemCells[point[0],point[1]] == .Enegy {
+                count = count + 1
+            }
+        }
+        
+        return count
         
     }
     
@@ -792,6 +1046,24 @@ class GameScene: SKScene {
         
     }
     
+    func  resetEnemiesEnegyLevel() {
+        
+        for enemy in Enemies {
+            
+            enemy.EnegyLevel = 1
+            
+            for row in 0 ..< BoardSizeXRow { //.routeを.emptyに直す
+                for column in 0 ..< BoardSizeYColumn {
+                    
+                    enemy.MoveFiled[row,column] = nil
+                    
+                }
+            }
+            
+        }
+        
+    }
+    
     func setRouteImage(row:Int,column:Int,PointFlag:Bool,number:Int) {
         
         var ImageName:String = ""
@@ -890,41 +1162,42 @@ class GameScene: SKScene {
     func SampleCharacter() {
         
         //味方の生成
-        let oneA:Character = Character(Id: 1, Name: "one", Attack: 10, Defence: 1, MaxHp: 50, Move: 4,Side: .ally)//oneeというキャラクターを用意
+        let oneA:Character = Character(Id: 1, Name: "one", Attack: 5, Defence: 1, MaxHp: 50, Move: 4,Side: .ally)//oneeというキャラクターを用意
         oneA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
         oneA.ActiveSkill1 = Skill(id: 2, name: "", magnification: 1.0, range: [[-1,1],[-1,0],[-1,0]], skillType: .attack)
         oneA.ActiveSkill2 = Skill(id: 3, name: "", magnification: 2.0, range: [[0,1],[0,-1]], skillType: .attack)
         oneA.ActiveSkill3 = Skill(id: 4, name: "tate", magnification: 3.0, range: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],[0,-3],[0,-4],[0,-5],[0,-6],[0,-7]], skillType: .attack)
-        self.addCharacterBoard(character: oneA, row: 0, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.addCharacterBoard(character: oneA, row: 2, column: 4)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(oneA)
                 
-        let twoB:Character = Character(Id: 2, Name: "two", Attack: 10, Defence: 1, MaxHp: 50, Move: 5,Side: .ally)//twoというキャラクターを用意
+        let twoB:Character = Character(Id: 2, Name: "two", Attack: 5, Defence: 1, MaxHp: 50, Move: 5,Side: .ally)//twoというキャラクターを用意
         twoB.ActiveSkill0 = Skill(id: 5, name: "yoko", magnification: 1.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .attack)
         twoB.ActiveSkill1 = Skill(id: 6, name: "yoko", magnification: 1.0, range: [[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
         twoB.ActiveSkill2 = Skill(id: 7, name: "yoko", magnification: 1.0, range: [[1,1],[0,1],[-1,1],[1,-1],[0,-1],[-1,-1]], skillType: .attack)
         twoB.ActiveSkill3 = Skill(id: 8, name: "yoko", magnification: 2.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
-        self.addCharacterBoard(character: twoB, row: 2, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.addCharacterBoard(character: twoB, row: 3, column: 4)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(twoB)
         
-        let threeC:Character = Character(Id: 3, Name: "three", Attack: 10, Defence: 1, MaxHp: 50, Move: 6,Side: .ally)//threeというキャラクターを用意
+        let threeC:Character = Character(Id: 3, Name: "three", Attack: 5, Defence: 1, MaxHp: 50, Move: 6,Side: .ally)//threeというキャラクターを用意
         threeC.ActiveSkill0 = Skill(id: 9, name: "syuui", magnification: 1.0, range: [[1,1],[1,0],[1,-1]], skillType: .attack)
         threeC.ActiveSkill0 = Skill(id: 10, name: "syuui", magnification: 1.0, range: [[0,1],[0,-1]], skillType: .attack)
         threeC.ActiveSkill0 = Skill(id: 11, name: "syuui", magnification: 1.0, range: [[-1,-1],[-1,0],[-1,1]], skillType: .attack)
         threeC.ActiveSkill0 = Skill(id: 12, name: "syuui", magnification: 2.0, range: [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]], skillType: .attack)
-        self.addCharacterBoard(character: threeC, row: 4, column: 2)//キャラクターの情報と画像をBoardとdiskNodesに追加。
+        self.addCharacterBoard(character: threeC, row: 2, column: 3)//キャラクターの情報と画像をBoardとdiskNodesに追加。
         self.Allys.append(threeC)
         
         //敵の生成
-        let firstA:Character = Character(Id: 1, Name: "first", Attack: 30, Defence: 1, MaxHp: 10, Move: 2,Side: .enemy)
+        let firstA:Character = Character(Id: 1, Name: "first", Attack: 30, Defence: 1, MaxHp: 30, Move: 3,Side: .enemy)
         self.addCharacterBoard(character: firstA, row: 1, column: 6)
-        //firstA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0]], skillType: .alert)
-        firstA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[1,0],[0,1],[-1,0],[0,-1]], skillType: .attack)
+        firstA.ActiveSkill0 = Skill(id: 1, name: "", magnification: 1.0, range: [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,-1],[0,-2],[0,-3],[0,-4],[0,-5],[0,-6],[0,-7]], skillType: .attack)
+        firstA.ActiveSkill1 = Skill(id: 2, name: "", magnification: 1.5, range: [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,0],[-1,1]], skillType: .attack)
         self.Enemies.append(firstA)
         
-        //    let secondB:Character = Character(Id: 2, Name: "second", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
-        //    self.addCharacterBoard(character: secondB, row: 2, column: 6)
-        //    self.Enemies.append(secondB)
-        //
+        let secondB:Character = Character(Id: 2, Name: "second", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
+        self.addCharacterBoard(character: secondB, row: 2, column: 6)
+        secondB.ActiveSkill0 = Skill(id: 8, name: "yoko", magnification: 2.0, range: [[1,0],[2,0],[3,0],[4,0],[5,0],[-1,0],[-2,0],[-3,0],[-4,0],[-5,0]], skillType: .attack)
+        self.Enemies.append(secondB)
+        
         //    let thirdC:Character = Character(Id: 3, Name: "third", Attack: 1, Defence: 1, MaxHp: 50, Move: 4,Side: .enemy)
         //    self.addCharacterBoard(character: thirdC, row: 4, column: 6)
         //    self.Enemies.append(thirdC)
