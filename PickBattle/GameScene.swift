@@ -54,6 +54,11 @@ class GameScene: SKScene {
     //敵を入れるための配列
     var Enemies:[Character] = []
     
+    //ステージ管理用のuserdefaults
+    let userDefaults = UserDefaults.standard
+    var world = 0
+    var stage = 0
+    
     override func didMove(to view: SKView) {
         
         super.anchorPoint = CGPoint(x: 0.5,y: 0.5)
@@ -166,6 +171,7 @@ class GameScene: SKScene {
     //盤面の初期化
     func initBoard() {
         
+        self.getWorldStage()
         //ボードのインスタンスを生成
         self.board = Board()
         //キャラクターの追加
@@ -1158,6 +1164,14 @@ class GameScene: SKScene {
         
     }
     
+    func getWorldStage() {
+        
+        //ワールドとステージを取得する
+        world = userDefaults.integer(forKey: "world")
+        stage = userDefaults.integer(forKey: "stage")
+        print("\(world)")
+        
+    }
     
     func SampleCharacter() {
         

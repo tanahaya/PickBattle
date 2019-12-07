@@ -12,7 +12,7 @@ import GameplayKit
 
 class GameViewController: UIViewController {
     
-    private var scene: GameScene!
+    private var scene: HomeScene!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,7 +20,7 @@ class GameViewController: UIViewController {
         let skView = self.view as! SKView
         skView.isMultipleTouchEnabled = false
         
-        self.scene = GameScene()
+        self.scene = HomeScene()
         self.scene.size = CGSize(width: 414, height: 896)
         self.scene.scaleMode = .aspectFit
         

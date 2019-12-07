@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1002FA98239B474D008369EB /* HomeScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FA97239B474D008369EB /* HomeScene.swift */; };
+		1002FA9A239B4949008369EB /* SelectScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FA99239B4949008369EB /* SelectScene.swift */; };
 		1093484A2394D1100020B9A1 /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109348492394D1100020B9A1 /* Character.swift */; };
 		1093484C23975EC10020B9A1 /* CellItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1093484B23975EC10020B9A1 /* CellItem.swift */; };
 		1093484E23978EA80020B9A1 /* Skill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1093484D23978EA80020B9A1 /* Skill.swift */; };
@@ -22,6 +24,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1002FA97239B474D008369EB /* HomeScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScene.swift; sourceTree = "<group>"; };
+		1002FA99239B4949008369EB /* SelectScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectScene.swift; sourceTree = "<group>"; };
 		109348492394D1100020B9A1 /* Character.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
 		1093484B23975EC10020B9A1 /* CellItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellItem.swift; sourceTree = "<group>"; };
 		1093484D23978EA80020B9A1 /* Skill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skill.swift; sourceTree = "<group>"; };
@@ -70,6 +74,8 @@
 			children = (
 				10C606462393BD4100A3F021 /* AppDelegate.swift */,
 				10C6064E2393BD4100A3F021 /* GameViewController.swift */,
+				1002FA97239B474D008369EB /* HomeScene.swift */,
+				1002FA99239B4949008369EB /* SelectScene.swift */,
 				10C6064C2393BD4100A3F021 /* GameScene.swift */,
 				10BD32882393C91E009A2FDD /* CellState.swift */,
 				1093484B23975EC10020B9A1 /* CellItem.swift */,
@@ -159,6 +165,8 @@
 				1093484C23975EC10020B9A1 /* CellItem.swift in Sources */,
 				10BD328D2393CF52009A2FDD /* Array2D.swift in Sources */,
 				10C6064D2393BD4100A3F021 /* GameScene.swift in Sources */,
+				1002FA98239B474D008369EB /* HomeScene.swift in Sources */,
+				1002FA9A239B4949008369EB /* SelectScene.swift in Sources */,
 				1093484E23978EA80020B9A1 /* Skill.swift in Sources */,
 				1093484A2394D1100020B9A1 /* Character.swift in Sources */,
 				10BD32892393C91E009A2FDD /* CellState.swift in Sources */,
