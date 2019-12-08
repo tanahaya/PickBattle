@@ -110,9 +110,8 @@ class HomeScene : SKScene, SKPhysicsContactDelegate{
             case "mapIcon5":
                 userDefaults.set(5, forKey: "world")
                 self.gotoSelectScene()
-            case "levelup":
-                userDefaults.set(12, forKey: "world")
-                self.gotoSelectScene()
+            case "levelUp":
+                self.gotoTeamScene()
             default:
                 print("nomalarea")
             }
@@ -136,6 +135,16 @@ class HomeScene : SKScene, SKPhysicsContactDelegate{
     func gotoSelectScene() {
         
         let Scene = SelectScene()
+        Scene.size = self.size
+        let transition = SKTransition.crossFade(withDuration: 0.5)
+
+        self.view?.presentScene(Scene, transition: transition)
+        
+    }
+    
+    func gotoTeamScene() {
+        
+        let Scene = TeamScene()
         Scene.size = self.size
         let transition = SKTransition.crossFade(withDuration: 0.5)
 

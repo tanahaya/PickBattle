@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		1002FA98239B474D008369EB /* HomeScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FA97239B474D008369EB /* HomeScene.swift */; };
 		1002FA9A239B4949008369EB /* SelectScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FA99239B4949008369EB /* SelectScene.swift */; };
+		1002FA9C239D0EA5008369EB /* TeamScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FA9B239D0EA5008369EB /* TeamScene.swift */; };
+		1002FA9E239D1294008369EB /* CharacterSortScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FA9D239D1294008369EB /* CharacterSortScene.swift */; };
+		1002FAA0239D12B8008369EB /* WeaponSortScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FA9F239D12B8008369EB /* WeaponSortScene.swift */; };
+		1002FAA2239D12E3008369EB /* CharacterViewScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FAA1239D12E3008369EB /* CharacterViewScene.swift */; };
+		1002FAA4239D17A6008369EB /* DevelopScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1002FAA3239D17A6008369EB /* DevelopScene.swift */; };
 		1093484A2394D1100020B9A1 /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109348492394D1100020B9A1 /* Character.swift */; };
 		1093484C23975EC10020B9A1 /* CellItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1093484B23975EC10020B9A1 /* CellItem.swift */; };
 		1093484E23978EA80020B9A1 /* Skill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1093484D23978EA80020B9A1 /* Skill.swift */; };
@@ -26,6 +31,11 @@
 /* Begin PBXFileReference section */
 		1002FA97239B474D008369EB /* HomeScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScene.swift; sourceTree = "<group>"; };
 		1002FA99239B4949008369EB /* SelectScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectScene.swift; sourceTree = "<group>"; };
+		1002FA9B239D0EA5008369EB /* TeamScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamScene.swift; sourceTree = "<group>"; };
+		1002FA9D239D1294008369EB /* CharacterSortScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterSortScene.swift; sourceTree = "<group>"; };
+		1002FA9F239D12B8008369EB /* WeaponSortScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaponSortScene.swift; sourceTree = "<group>"; };
+		1002FAA1239D12E3008369EB /* CharacterViewScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterViewScene.swift; sourceTree = "<group>"; };
+		1002FAA3239D17A6008369EB /* DevelopScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevelopScene.swift; sourceTree = "<group>"; };
 		109348492394D1100020B9A1 /* Character.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Character.swift; sourceTree = "<group>"; };
 		1093484B23975EC10020B9A1 /* CellItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellItem.swift; sourceTree = "<group>"; };
 		1093484D23978EA80020B9A1 /* Skill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skill.swift; sourceTree = "<group>"; };
@@ -77,6 +87,11 @@
 				1002FA97239B474D008369EB /* HomeScene.swift */,
 				1002FA99239B4949008369EB /* SelectScene.swift */,
 				10C6064C2393BD4100A3F021 /* GameScene.swift */,
+				1002FA9B239D0EA5008369EB /* TeamScene.swift */,
+				1002FA9D239D1294008369EB /* CharacterSortScene.swift */,
+				1002FAA1239D12E3008369EB /* CharacterViewScene.swift */,
+				1002FA9F239D12B8008369EB /* WeaponSortScene.swift */,
+				1002FAA3239D17A6008369EB /* DevelopScene.swift */,
 				10BD32882393C91E009A2FDD /* CellState.swift */,
 				1093484B23975EC10020B9A1 /* CellItem.swift */,
 				109348492394D1100020B9A1 /* Character.swift */,
@@ -165,13 +180,18 @@
 				1093484C23975EC10020B9A1 /* CellItem.swift in Sources */,
 				10BD328D2393CF52009A2FDD /* Array2D.swift in Sources */,
 				10C6064D2393BD4100A3F021 /* GameScene.swift in Sources */,
+				1002FA9C239D0EA5008369EB /* TeamScene.swift in Sources */,
+				1002FA9E239D1294008369EB /* CharacterSortScene.swift in Sources */,
 				1002FA98239B474D008369EB /* HomeScene.swift in Sources */,
+				1002FAA2239D12E3008369EB /* CharacterViewScene.swift in Sources */,
 				1002FA9A239B4949008369EB /* SelectScene.swift in Sources */,
 				1093484E23978EA80020B9A1 /* Skill.swift in Sources */,
 				1093484A2394D1100020B9A1 /* Character.swift in Sources */,
+				1002FAA4239D17A6008369EB /* DevelopScene.swift in Sources */,
 				10BD32892393C91E009A2FDD /* CellState.swift in Sources */,
 				10C6064F2393BD4100A3F021 /* GameViewController.swift in Sources */,
 				10BD328F2393DED7009A2FDD /* Broad.swift in Sources */,
+				1002FAA0239D12B8008369EB /* WeaponSortScene.swift in Sources */,
 				10C606472393BD4100A3F021 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
