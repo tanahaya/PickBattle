@@ -18,6 +18,8 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
     
     var nameLabel = SKLabelNode()
     
+    var gameTableView = GameTableView()
+    
     override func didMove(to view: SKView) {
         
         //起動した時の処理
@@ -41,6 +43,13 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
         nameLabel.text = "キャラクター一覧"
         self.addChild(nameLabel)
         
+        // Table setup
+        gameTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        //tableviewのxyは右上が(0,0)です。
+        gameTableView.frame = CGRect(x:7,y:196,width:400,height:600)
+        self.scene?.view?.addSubview(gameTableView)
+        gameTableView.reloadData()
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -59,6 +68,9 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
     
     func gotoTeamScene() {
         
+        //tableviewを消す
+        gameTableView.removeFromSuperview()
+        
         let Scene = TeamScene()
         Scene.size = self.size
         let transition = SKTransition.crossFade(withDuration: 0.5)
@@ -67,5 +79,45 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
         
     }
     
+    
+}
+
+class GameTableView: UITableView,UITableViewDelegate,UITableViewDataSource {
+    
+    var items: [String] = ["Player1", "Player2", "Player3"]
+    
+    override init(frame: CGRect, style: UITableView.Style) {
+        super.init(frame: frame, style: style)
+        self.delegate = self
+        self.dataSource = self
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    //tableviewのために必要
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return items.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell:UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell")! as UITableViewCell
+        cell.textLabel?.text = self.items[indexPath.row]
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return "Section \(section)"
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //0スタートです。
+        print("You selected cell #\(indexPath.row)!")
+    }
     
 }

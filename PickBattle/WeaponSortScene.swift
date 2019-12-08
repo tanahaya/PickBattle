@@ -18,6 +18,8 @@ class WeaponSortScene : SKScene, SKPhysicsContactDelegate{
     
     var nameLabel = SKLabelNode()
     
+    var gameTableView = GameTableView()
+    
     override func didMove(to view: SKView) {
         
         //起動した時の処理
@@ -41,6 +43,13 @@ class WeaponSortScene : SKScene, SKPhysicsContactDelegate{
         nameLabel.text = "武器一覧"
         self.addChild(nameLabel)
         
+        // Table setup
+        gameTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        //tableviewのxyは右上が(0,0)です。
+        gameTableView.frame = CGRect(x:7,y:196,width:400,height:600)
+        self.scene?.view?.addSubview(gameTableView)
+        gameTableView.reloadData()
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -58,6 +67,9 @@ class WeaponSortScene : SKScene, SKPhysicsContactDelegate{
     }
     
     func gotoTeamScene() {
+        
+        //tableviewを消す
+        gameTableView.removeFromSuperview()
         
         let Scene = TeamScene()
         Scene.size = self.size
