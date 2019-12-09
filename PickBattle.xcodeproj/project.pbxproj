@@ -26,6 +26,7 @@
 		10C606522393BD4100A3F021 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 10C606502393BD4100A3F021 /* Main.storyboard */; };
 		10C606542393BD4200A3F021 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10C606532393BD4200A3F021 /* Assets.xcassets */; };
 		10C606572393BD4200A3F021 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 10C606552393BD4200A3F021 /* LaunchScreen.storyboard */; };
+		547B5A2CC3F6866BCBEFAE50 /* Pods_PickBattle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 802FCEAF298C2824CB39227F /* Pods_PickBattle.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,9 @@
 		10C606532393BD4200A3F021 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		10C606562393BD4200A3F021 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		10C606582393BD4200A3F021 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3E5AFCBA368427242226DFFC /* Pods-PickBattle.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PickBattle.release.xcconfig"; path = "Target Support Files/Pods-PickBattle/Pods-PickBattle.release.xcconfig"; sourceTree = "<group>"; };
+		802FCEAF298C2824CB39227F /* Pods_PickBattle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PickBattle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AC67455EE7222E8CFC1C323 /* Pods-PickBattle.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PickBattle.debug.xcconfig"; path = "Target Support Files/Pods-PickBattle/Pods-PickBattle.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				547B5A2CC3F6866BCBEFAE50 /* Pods_PickBattle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,6 +73,8 @@
 			children = (
 				10C606452393BD4100A3F021 /* PickBattle */,
 				10C606442393BD4100A3F021 /* Products */,
+				69CEFD62E3C19AA9BB5B67F0 /* Pods */,
+				711ACB55759DF2BB746DD6DE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -106,6 +113,24 @@
 			path = PickBattle;
 			sourceTree = "<group>";
 		};
+		69CEFD62E3C19AA9BB5B67F0 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9AC67455EE7222E8CFC1C323 /* Pods-PickBattle.debug.xcconfig */,
+				3E5AFCBA368427242226DFFC /* Pods-PickBattle.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		711ACB55759DF2BB746DD6DE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				802FCEAF298C2824CB39227F /* Pods_PickBattle.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -113,9 +138,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 10C6065B2393BD4200A3F021 /* Build configuration list for PBXNativeTarget "PickBattle" */;
 			buildPhases = (
+				C34A4C3120B97EF4BB79D06A /* [CP] Check Pods Manifest.lock */,
 				10C6063F2393BD4100A3F021 /* Sources */,
 				10C606402393BD4100A3F021 /* Frameworks */,
 				10C606412393BD4100A3F021 /* Resources */,
+				28515E177F0682EA8A68017F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -171,6 +198,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		28515E177F0682EA8A68017F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PickBattle/Pods-PickBattle-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PickBattle/Pods-PickBattle-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PickBattle/Pods-PickBattle-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C34A4C3120B97EF4BB79D06A /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PickBattle-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		10C6063F2393BD4100A3F021 /* Sources */ = {
@@ -334,6 +403,7 @@
 		};
 		10C6065C2393BD4200A3F021 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9AC67455EE7222E8CFC1C323 /* Pods-PickBattle.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -352,6 +422,7 @@
 		};
 		10C6065D2393BD4200A3F021 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3E5AFCBA368427242226DFFC /* Pods-PickBattle.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
