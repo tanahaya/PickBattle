@@ -9,12 +9,14 @@
 import Foundation
 import UIKit
 import SpriteKit
+import RealmSwift
 
 class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
     
     var BackButton = SKSpriteNode(imageNamed: "BackButton")
+    var levelup = SKSpriteNode(imageNamed: "levelUp")
     
-    let userDefaults = UserDefaults.standard//管理用のuserdefaults
+    let realm = try! Realm()
     
     var nameLabel = SKLabelNode()
     
@@ -36,6 +38,15 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
         BackButton.position = CGPoint(x: 364,y: 50)
         self.addChild(BackButton)
         
+        levelup.name = "levelUp"
+        levelup.anchorPoint = CGPoint(x: 0,y: 0)
+        levelup.position = CGPoint(x:314,y: 700)
+        levelup.size = CGSize(width: 100, height: 100)
+        levelup.physicsBody?.categoryBitMask = 0
+        levelup.physicsBody?.contactTestBitMask = 0
+        levelup.physicsBody?.collisionBitMask = 0
+        self.addChild(levelup)
+        
         nameLabel.fontSize = 30
         nameLabel.fontColor = UIColor.red
         nameLabel.color = UIColor.white
@@ -50,6 +61,8 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
         self.scene?.view?.addSubview(gameTableView)
         gameTableView.reloadData()
         
+        self.getCharacterData()
+        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -61,7 +74,9 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
             if self.atPoint(location).name == "BackButton" {
                 self.gotoTeamScene()
             }
-            
+            if self.atPoint(location).name == "levelUp" {
+                self.addCharacter()
+            }
         }
         
     }
@@ -79,12 +94,33 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
         
     }
     
+    func getCharacterData() {
+        
+        let characters:[Character] = Character.loadAll()
+        
+        print(characters)
+        
+        gameTableView.charactersArray = characters
+        
+        self.gameTableView.reloadData()
+        
+    }
+    
+    func addCharacter() {
+        
+        let character = Character.create(id: 1, name: "go", attack: 1, defence: 1, maxHp: 11, move: 1, side: .ally)
+        //キャラクターをセーブする。
+        character.save()
+        
+    }
+    
     
 }
 
 class GameTableView: UITableView,UITableViewDelegate,UITableViewDataSource {
     
     var items: [String] = ["Player1", "Player2", "Player3"]
+    var charactersArray: [Character] = []
     
     override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: style)
@@ -102,12 +138,12 @@ class GameTableView: UITableView,UITableViewDelegate,UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        return charactersArray.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell:UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell")! as UITableViewCell
-        cell.textLabel?.text = self.items[indexPath.row]
+        cell.textLabel?.text = self.charactersArray[indexPath.row].Name
         return cell
     }
     

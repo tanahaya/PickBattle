@@ -2,9 +2,10 @@
 # platform :ios, '9.0'
 
 target 'PickBattle' do
-  # Comment the next line if you don't want to use dynamic frameworks
+  # Comment the next line if you don't want to use dynamic frameworks 
   use_frameworks!
   pod 'RealmSwift'
+  pod 'Realm'
 
   # Pods for PickBattle
 

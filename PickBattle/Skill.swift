@@ -7,24 +7,15 @@
 //
 
 import Foundation
+import RealmSwift
 
-class Skill {
+class Skill:Object {
     
-    var id:Int = 0
-    var name:String = ""
-    var magnification:Double = 1.0 //攻撃倍率
-    var range:[[Int]] = []
-    var skillType:skillType = .attack
-    
-    init(id:Int,name:String,magnification:Double,range:[[Int]],skillType:skillType) {
-        
-        self.id = id
-        self.name = name
-        self.magnification = magnification
-        self.range = range
-        self.skillType = skillType
-        
-    }
+    dynamic var id:Int = 0
+    dynamic var name:String = ""
+    dynamic var magnification:Double = 1.0 //攻撃倍率
+    dynamic var range:[[Int]] = []
+    dynamic var skillType:skillType = .attack
     
     enum skillType:Int { //attackが0、healが1
         
