@@ -18,12 +18,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
+//        ファイルを消すコード
+//        if let fileURL = Realm.Configuration.defaultConfiguration.fileURL {
+//            try! FileManager.default.removeItem(at: fileURL)
+//        }
+        
         let config = Realm.Configuration(
             
-            schemaVersion: 1,
+            schemaVersion: 2,
              
             migrationBlock: { migration, oldSchemaVersion in
-                if (oldSchemaVersion < 1) {
+                if (oldSchemaVersion < 2) {
                      
                 }
         })

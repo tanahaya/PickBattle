@@ -16,6 +16,8 @@ class Skill:Object {
     dynamic var magnification:Double = 1.0 //攻撃倍率
     dynamic var range:[[Int]] = []
     dynamic var skillType:skillType = .attack
+    dynamic var explation:String = ""
+    dynamic var rangeExplation:String = ""
     
     enum skillType:Int { //attackが0、healが1
         

@@ -39,15 +39,31 @@ class Character :Object {
     //移動を管理する。ここで宣言する必要があるかどうかは不明。
     dynamic var MoveFiled = Array2D<Int>(rows: BoardSizeXRow, columns: BoardSizeYColumn, repeatedValue: nil)
     
+    static let realm = try! Realm()
+    
     enum side:Int {
         case ally = 0,enemy //allyが0、enemyが1
+    }
+    
+    override static func primaryKey() -> String {
+        return "Id"
+    }
+    
+    static func lastId() -> Int {
+        // isDoneの値を変更するとデータベース上の順序が変わるために、以下のようにしてidでソートして最大値を求めて+1して返す
+        // 更新の必要がないなら、 realm.objects(ToDoModel).last で最後のデータのidを取得すればよい
+        if let character = realm.objects(Character.self).sorted(byKeyPath: "Id", ascending: false).first {
+            return character.Id + 1
+        }else {
+            return 1
+        }
     }
     
     static func create(id:Int,name:String,attack:Int,defence:Int,maxHp:Int,move:Int,side:side) -> Character {
         
         let character = Character()
         
-        character.Id = id
+        character.Id = lastId()
         character.CharacterId = id
         character.Name = name
         character.Attack = attack

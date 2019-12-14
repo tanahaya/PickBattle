@@ -147,7 +147,7 @@ class HomeScene : SKScene, SKPhysicsContactDelegate{
         let Scene = TeamScene()
         Scene.size = self.size
         let transition = SKTransition.crossFade(withDuration: 0.5)
-
+        
         self.view?.presentScene(Scene, transition: transition)
         
     }

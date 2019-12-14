@@ -11,7 +11,7 @@ import UIKit
 import SpriteKit
 import RealmSwift
 
-class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
+class CharacterSortScene : SKScene, SKPhysicsContactDelegate {
     
     var BackButton = SKSpriteNode(imageNamed: "BackButton")
     var levelup = SKSpriteNode(imageNamed: "levelUp")
@@ -23,8 +23,6 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
     var gameTableView = GameTableView()
     
     override func didMove(to view: SKView) {
-        
-        gameTableView.register(UINib(nibName: "CharacterCell", bundle: nil), forCellReuseIdentifier: "CharacterCell")
         
         //起動した時の処理
         self.size = CGSize(width: 414, height: 896)//414x896が最適。これはiphoneXRの画面サイズ
@@ -62,6 +60,7 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
         gameTableView.frame = CGRect(x:7,y:196,width:400,height:600)
         self.scene?.view?.addSubview(gameTableView)
         gameTableView.reloadData()
+        
         
         self.getCharacterData()
         
@@ -116,57 +115,90 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
         
     }
     
+    func gotoCharacterViewScene() {
+        
+        //tableviewを消す
+        gameTableView.removeFromSuperview()
+        
+        let Scene = CharacterSortScene()
+        Scene.size = self.size
+        let transition = SKTransition.crossFade(withDuration: 0.5)
+
+        self.view?.presentScene(Scene, transition: transition)
+        
+    }
+    
+    class GameTableView: UITableView,UITableViewDelegate,UITableViewDataSource {
+        
+        var charactersArray: [Character] = []
+        
+        override init(frame: CGRect, style: UITableView.Style) {
+            
+            super.init(frame: frame, style: style)
+            self.delegate = self
+            self.dataSource = self
+            
+        }
+        
+        required init?(coder aDecoder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+        
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return charactersArray.count
+        }
+        
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            
+            let nameLabel = UILabel(frame: CGRect(x: 140, y: 10, width: 200, height: 30))
+            nameLabel.text = charactersArray[indexPath.row].Name
+            nameLabel.font = UIFont.systemFont(ofSize: 24)
+            cell.addSubview(nameLabel)
+            
+            let experieneceLevelLabel = UILabel(frame: CGRect(x: 140, y: 60, width: 70, height: 30))
+            experieneceLevelLabel.text = "E-lv: \(charactersArray[indexPath.row].ExperienceLevel)"
+            experieneceLevelLabel.font = UIFont.systemFont(ofSize: 18)
+            cell.addSubview(experieneceLevelLabel)
+            
+            let developLevelLabel = UILabel(frame: CGRect(x: 220, y: 60, width: 70, height: 30))
+            developLevelLabel.text = "D-lv: \(charactersArray[indexPath.row].DevelopLevel)"
+            developLevelLabel.font = UIFont.systemFont(ofSize: 18)
+            cell.addSubview(developLevelLabel)
+            
+            let characterImageview = UIImageView(frame: CGRect(x: 40, y: 20, width: 80, height: 80))
+            cell.addSubview(characterImageview)
+            
+            let detailButton = UIButton(frame: CGRect(x: 320, y: 20, width: 60, height: 60))
+            detailButton.backgroundColor = UIColor.red
+            detailButton.setTitle("detail", for: .normal)
+            detailButton.addTarget(self, action: #selector(touchButton(sender:)), for: .touchUpInside)
+            cell.addSubview(detailButton)
+            
+            return cell
+            
+        }
+        
+        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+            
+            return 100
+        }
+        
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            //0スタートです。
+            print("You selected cell #\(indexPath.row)!")
+        }
+        
+        @objc func touchButton(sender: UIButton) {
+            
+            
+            
+        }
+        
+    }
+    
     
 }
 
-class GameTableView: UITableView,UITableViewDelegate,UITableViewDataSource {
-    
-    var charactersArray: [Character] = []
-    
-    override init(frame: CGRect, style: UITableView.Style) {
-        
-        super.init(frame: frame, style: style)
-        self.delegate = self
-        self.dataSource = self
-        self.register(CharacterCell.self, forCellReuseIdentifier: "cell")
-        
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    //tableviewのために必要
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return charactersArray.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell:CharacterCell = tableView.dequeueReusableCell(withIdentifier: "CharacterCell") as! CharacterCell
-        cell.nameLabel.text = charactersArray[indexPath.row].Name
-        cell.developLevelLabel.text = "D-Lv:\(charactersArray[indexPath.row].DevelopLevel)"
-        cell.experieneceLevelLabel.text = "E-Lv:\(charactersArray[indexPath.row].ExperienceLevel)"
-        return cell
-        
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        
-        return 100
-    }
-    
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "Section \(section)"
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //0スタートです。
-        print("You selected cell #\(indexPath.row)!")
-    }
-    
-}
+
