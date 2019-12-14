@@ -24,6 +24,8 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
     
     override func didMove(to view: SKView) {
         
+        gameTableView.register(UINib(nibName: "CharacterCell", bundle: nil), forCellReuseIdentifier: "CharacterCell")
+        
         //起動した時の処理
         self.size = CGSize(width: 414, height: 896)//414x896が最適。これはiphoneXRの画面サイズ
         self.physicsWorld.gravity = CGVector(dx: 0.0, dy: 0.0)
@@ -119,13 +121,15 @@ class CharacterSortScene : SKScene, SKPhysicsContactDelegate{
 
 class GameTableView: UITableView,UITableViewDelegate,UITableViewDataSource {
     
-    var items: [String] = ["Player1", "Player2", "Player3"]
     var charactersArray: [Character] = []
     
     override init(frame: CGRect, style: UITableView.Style) {
+        
         super.init(frame: frame, style: style)
         self.delegate = self
         self.dataSource = self
+        self.register(CharacterCell.self, forCellReuseIdentifier: "cell")
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -142,9 +146,18 @@ class GameTableView: UITableView,UITableViewDelegate,UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell:UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell")! as UITableViewCell
-        cell.textLabel?.text = self.charactersArray[indexPath.row].Name
+        
+        let cell:CharacterCell = tableView.dequeueReusableCell(withIdentifier: "CharacterCell") as! CharacterCell
+        cell.nameLabel.text = charactersArray[indexPath.row].Name
+        cell.developLevelLabel.text = "D-Lv:\(charactersArray[indexPath.row].DevelopLevel)"
+        cell.experieneceLevelLabel.text = "E-Lv:\(charactersArray[indexPath.row].ExperienceLevel)"
         return cell
+        
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
+        return 100
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
